@@ -24,7 +24,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white animate-fade-slide-up">
+    <div className="flex flex-col h-full bg-white">
       <TopBar
         showLogo
         rightAction={
