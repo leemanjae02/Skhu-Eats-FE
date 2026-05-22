@@ -34,28 +34,45 @@ const sanitizeUser = (user: Member): User => {
 };
 
 export const memberHandlers = [
-  http.post("/api/auth/login", async ({ request }) => {
-    const { email, password } = (await request.json()) as LoginBody;
-    const user = members.find(
-      (m) => m.email === email && m.password === password,
-    );
+  // Auth: Login
+  http.post(/\/auth\/login$/, async ({ request }) => {
+    console.log(`[MSW Handler] Intercepted POST /api/auth/login`);
+    try {
+      const body = await request.json() as LoginBody;
+      console.log(`[MSW Handler] Body:`, body);
 
-    if (user) {
-      const token = `mock-jwt-token-${Math.random().toString(36).slice(2, 11)}`;
-      activeSessions.set(token, user.email);
-      return HttpResponse.json({
-        message: "Login successful",
-        user: sanitizeUser(user),
-        token,
+      const { email, password } = body;
+      const user = members.find(
+        (m) => m.email === email && m.password === password,
+      );
+
+      if (user) {
+        console.log(`[MSW Handler] Login success for ${email}`);
+        const token = `mock-jwt-token-${Math.random().toString(36).slice(2, 11)}`;
+        activeSessions.set(token, user.email);
+        return HttpResponse.json({
+          message: "Login successful",
+          user: sanitizeUser(user),
+          token,
+        });
+      }
+      console.log(`[MSW Handler] Login failed for ${email}`);
+      return new HttpResponse(JSON.stringify({ message: "아이디 또는 비밀번호가 틀렸어요" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" }
+      });
+    } catch (err) {
+      console.error(`[MSW Handler] Error parsing login body:`, err);
+      return new HttpResponse(JSON.stringify({ message: "Invalid request body" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
       });
     }
-    return new HttpResponse(JSON.stringify({ message: "아이디 또는 비밀번호가 틀렸어요" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" }
-    });
   }),
 
-  http.post("/api/auth/send-code", async ({ request }) => {
+  // Auth: Send Code
+  http.post(/\/auth\/send-code$/, async ({ request }) => {
+    console.log(`[MSW Handler] Intercepted POST /api/auth/send-code`);
     const { email } = (await request.json()) as SendCodeBody;
     if (!email.endsWith("@skhu.ac.kr")) {
       return HttpResponse.json({ message: "학교 이메일만 사용 가능해요" }, { status: 400 });
@@ -64,7 +81,9 @@ export const memberHandlers = [
     return HttpResponse.json({ message: "인증코드가 발송됐어요" });
   }),
 
-  http.post("/api/auth/verify-code", async ({ request }) => {
+  // Auth: Verify Code
+  http.post(/\/auth\/verify-code$/, async ({ request }) => {
+    console.log(`[MSW Handler] Intercepted POST /api/auth/verify-code`);
     const { email, code } = (await request.json()) as VerifyCodeBody;
     if (pendingCodes.get(email) === code) {
       pendingCodes.delete(email);
@@ -73,7 +92,9 @@ export const memberHandlers = [
     return HttpResponse.json({ message: "인증코드가 올바르지 않아요" }, { status: 400 });
   }),
 
-  http.post("/api/auth/check-nickname", async ({ request }) => {
+  // Auth: Check Nickname
+  http.post(/\/auth\/check-nickname$/, async ({ request }) => {
+    console.log(`[MSW Handler] Intercepted POST /api/auth/check-nickname`);
     const { nickname } = (await request.json()) as CheckNicknameBody;
     const taken = members.some((m) => m.nickname === nickname);
     if (taken) {
@@ -82,7 +103,9 @@ export const memberHandlers = [
     return HttpResponse.json({ available: true });
   }),
 
-  http.post("/api/auth/register", async ({ request }) => {
+  // Auth: Register
+  http.post(/\/auth\/register$/, async ({ request }) => {
+    console.log(`[MSW Handler] Intercepted POST /api/auth/register`);
     const body = (await request.json()) as RegisterBody;
     const newUser: Member = {
       id: String(members.length + 101),
@@ -108,7 +131,9 @@ export const memberHandlers = [
     );
   }),
 
-  http.get("/api/members/me", ({ request }) => {
+  // Member: Get Me
+  http.get(/\/users\/me$/, ({ request }) => {
+    console.log(`[MSW Handler] Intercepted GET /api/members/me`);
     const authHeader = request.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");
     const email = token ? activeSessions.get(token) : undefined;
