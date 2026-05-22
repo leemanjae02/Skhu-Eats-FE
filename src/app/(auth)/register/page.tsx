@@ -48,8 +48,14 @@ type Step = 1 | 2;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { setAuth } = useAuthStore();
+  const { setAuth, isAuthenticated, _hasHydrated } = useAuthStore();
   const [step, setStep] = useState<Step>(1);
+
+  useEffect(() => {
+    if (_hasHydrated && isAuthenticated) {
+      router.replace("/");
+    }
+  }, [_hasHydrated, isAuthenticated, router]);
 
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState("");
@@ -167,8 +173,26 @@ export default function RegisterPage() {
     );
   };
 
+  if (!_hasHydrated) {
+    return (
+      <div className="flex flex-col flex-1 bg-white">
+        <header className="h-[52px]" />
+        <div className="flex-1" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return (
+      <div className="flex flex-col flex-1 bg-white">
+        <header className="h-[52px]" />
+        <div className="flex-1" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 bg-white h-full">
+    <div className="flex flex-col flex-1 bg-white">
       <header className="flex items-center justify-between px-2 py-1 h-[52px] shrink-0">
         <button
           onClick={() => (step === 1 ? router.push("/login") : setStep(1))}
@@ -192,7 +216,7 @@ export default function RegisterPage() {
         ))}
       </div>
 
-      <main className="flex-1 overflow-y-auto px-5 pt-8 pb-6 no-scrollbar">
+      <main className="flex-1 overflow-y-auto px-5 pt-8 pb-6 no-scrollbar animate-fade-slide-up">
         {step === 1 && (
           <form id="step1-form" onSubmit={onStep1Submit} className="space-y-5">
             <h1 className="text-[26px] font-bold text-grey-900 leading-[34px] tracking-[-0.5px] mb-8">
@@ -210,8 +234,8 @@ export default function RegisterPage() {
                   {...reg1("emailId", {
                     required: "이메일을 입력해주세요",
                     pattern: {
-                      value: /^[a-zA-Z0-9._-]+$/,
-                      message: "올바른 학번 또는 아이디를 입력해주세요",
+                      value: /^[a-zA-Z0-9._-]+(@skhu\.ac\.kr)?$/,
+                      message: "올바른 학번 또는 이메일을 입력해주세요",
                     },
                   })}
                   placeholder="학번 또는 아이디"

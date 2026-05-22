@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
@@ -12,14 +12,17 @@ import { useAuthStore } from "@/lib/store/useAuthStore";
 export default function HomePage() {
   const router = useRouter();
   const { user, isAuthenticated, _hasHydrated } = useAuthStore();
-  const [ready, setReady] = useState(false);
 
-  useLayoutEffect(() => {
-    setReady(true);
-  }, []);
+  const [isMounted, setIsMounted] = useState(
+    () => typeof window !== "undefined" && useAuthStore.getState()._hasHydrated,
+  );
 
-  if (!ready || !_hasHydrated) {
-    return <div className="flex flex-col h-full bg-white" />;
+  useEffect(() => {
+    if (!isMounted) setIsMounted(true);
+  }, [isMounted]);
+
+  if (!isMounted || !_hasHydrated) {
+    return <div className="flex-1 bg-white" />;
   }
 
   if (!isAuthenticated) {

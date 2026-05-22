@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -18,6 +19,12 @@ interface LoginForm {
 export default function LoginPage() {
   const router = useRouter();
   const { setAuth, isAuthenticated, _hasHydrated } = useAuthStore();
+
+  useEffect(() => {
+    if (_hasHydrated && isAuthenticated) {
+      router.replace("/");
+    }
+  }, [_hasHydrated, isAuthenticated, router]);
 
   const {
     register,
@@ -42,16 +49,25 @@ export default function LoginPage() {
   });
 
   if (!_hasHydrated) {
-    return <div className="flex flex-col flex-1 bg-white h-full" />;
+    return (
+      <div className="flex flex-col flex-1 bg-white">
+        <TopBar showLogo />
+        <div className="flex-1" />
+      </div>
+    );
   }
 
   if (isAuthenticated) {
-    router.replace("/");
-    return null;
+    return (
+      <div className="flex flex-col flex-1 bg-white">
+        <TopBar showLogo />
+        <div className="flex-1" />
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-white animate-fade-slide-up h-full">
+    <div className="flex flex-col flex-1 bg-white">
       <TopBar
         showLogo
         rightAction={
@@ -61,7 +77,7 @@ export default function LoginPage() {
         }
       />
 
-      <main className="flex-1 overflow-y-auto px-6 py-7 flex flex-col no-scrollbar">
+      <main className="flex-1 overflow-y-auto px-6 py-7 flex flex-col no-scrollbar animate-fade-slide-up">
         <section className="mb-8">
           <h1 className="text-[26px] font-bold text-grey-900 leading-[36px] tracking-[-0.6px] mb-2">
             오늘 점심,
@@ -84,12 +100,12 @@ export default function LoginPage() {
                 {...register("emailId", {
                   required: "이메일을 입력해주세요",
                   pattern: {
-                    value: /^[a-zA-Z0-9._-]+$/,
-                    message: "올바른 학번 또는 아이디를 입력해주세요",
+                    value: /^[a-zA-Z0-9._-]+(@skhu\.ac\.kr)?$/,
+                    message: "올바른 학번 또는 이메일을 입력해주세요",
                   },
                 })}
                 className="pr-24"
-                placeholder="학번 또는 이메일"
+                placeholder="학번 또는 아이디"
                 disabled={isSubmitting}
               />
               <span className="absolute right-4 text-[13px] font-medium text-grey-400">
@@ -157,7 +173,7 @@ export default function LoginPage() {
             </Link>
             <span className="text-grey-300 text-[13px]">|</span>
             <Link
-              href="/signup"
+              href="/register"
               className="text-[13px] font-bold text-grey-900 px-[10px] py-1"
             >
               회원가입
