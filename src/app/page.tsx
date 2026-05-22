@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
@@ -13,21 +13,14 @@ export default function HomePage() {
   const router = useRouter();
   const { user, isAuthenticated, _hasHydrated } = useAuthStore();
 
-  const [isMounted, setIsMounted] = useState(
-    () => typeof window !== "undefined" && useAuthStore.getState()._hasHydrated,
-  );
-
   useEffect(() => {
-    if (!isMounted) setIsMounted(true);
-  }, [isMounted]);
+    if (_hasHydrated && !isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [_hasHydrated, isAuthenticated, router]);
 
-  if (!isMounted || !_hasHydrated) {
+  if (!_hasHydrated || !isAuthenticated) {
     return <div className="flex-1 bg-white" />;
-  }
-
-  if (!isAuthenticated) {
-    router.replace("/login");
-    return null;
   }
 
   return (
