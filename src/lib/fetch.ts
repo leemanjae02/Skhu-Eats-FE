@@ -22,18 +22,27 @@ export async function serverFetch<T = unknown>(
   if (!BASE)
     throw new Error("[serverFetch] NEXT_PUBLIC_API_BASE_URL is not configured");
 
+  const method = (init?.method ?? "GET").toUpperCase();
+  const isSafeMethod = ["GET", "HEAD"].includes(method);
   const isFormData = init?.body instanceof FormData;
-  const res = await fetch(`${BASE}${path}`, {
+
+  const headers: Record<string, string> = {
+    ...(!isSafeMethod && !isFormData ? { "Content-Type": "application/json" } : {}),
+    ...normalizeHeaders(init?.headers),
+    ...buildAuthHeaders(token),
+  };
+
+  const fetchOptions: RequestInit = {
     ...init,
-    headers: {
-      ...(!["GET", "HEAD"].includes((init?.method ?? "GET").toUpperCase()) &&
-      !isFormData
-        ? { "Content-Type": "application/json" }
-        : {}),
-      ...normalizeHeaders(init?.headers),
-      ...buildAuthHeaders(token),
-    },
-  });
+    method,
+    headers,
+  };
+
+  if (isSafeMethod) {
+    delete fetchOptions.body;
+  }
+
+  const res = await fetch(`${BASE}${path}`, fetchOptions);
 
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error((json as { message?: string }).message ?? `HTTP ${res.status}`);
@@ -48,16 +57,27 @@ export async function serverFetchRaw(
   if (!BASE)
     throw new Error("[serverFetch] NEXT_PUBLIC_API_BASE_URL is not configured");
 
-  const res = await fetch(`${BASE}${path}`, {
+  const method = (init?.method ?? "GET").toUpperCase();
+  const isSafeMethod = ["GET", "HEAD"].includes(method);
+
+  const headers: Record<string, string> = {
+    ...(!isSafeMethod ? { "Content-Type": "application/json" } : {}),
+    ...normalizeHeaders(init?.headers),
+    ...buildAuthHeaders(token),
+  };
+
+  const fetchOptions: RequestInit = {
     ...init,
-    headers: {
-      ...(["GET", "HEAD"].includes((init?.method ?? "GET").toUpperCase())
-        ? {}
-        : { "Content-Type": "application/json" }),
-      ...normalizeHeaders(init?.headers),
-      ...buildAuthHeaders(token),
-    },
-  });
+    method,
+    headers,
+  };
+
+  // Ensure body is not present for GET/HEAD
+  if (isSafeMethod) {
+    delete fetchOptions.body;
+  }
+
+  const res = await fetch(`${BASE}${path}`, fetchOptions);
 
   const data = await res.json().catch(() => ({}));
   return { status: res.status, data };

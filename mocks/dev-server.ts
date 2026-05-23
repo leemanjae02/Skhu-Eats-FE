@@ -26,6 +26,8 @@ app.use((req, res) => {
   res.status(404).json({ message: `Mock handler not found for ${req.method} ${req.path}` });
 });
 
-app.listen(PORT, () => {
-  console.log(`[MSW] Mock server running on http://localhost:${PORT}`);
+const HOST = "127.0.0.1";
+
+app.listen(PORT, HOST, () => {
+  console.log(`[MSW] Mock server running on http://${HOST}:${PORT}`);
 });
