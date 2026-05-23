@@ -4,11 +4,10 @@ import { User } from "@/types/auth";
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   _hasHydrated: boolean;
-  setAuth: (user: User, token: string) => void;
-  logout: () => void;
+  setAuth: (user: User) => void;
+  logout: () => Promise<void>;
   setHasHydrated: (state: boolean) => void;
 }
 
@@ -16,11 +15,16 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
       _hasHydrated: false,
-      setAuth: (user, token) => set({ user, token, isAuthenticated: true }),
-      logout: () => set({ user: null, token: null, isAuthenticated: false }),
+      setAuth: (user) => set({ user, isAuthenticated: true }),
+      logout: async () => {
+        try {
+          await fetch("/auth/logout", { method: "POST" });
+        } finally {
+          set({ user: null, isAuthenticated: false });
+        }
+      },
       setHasHydrated: (state) => set({ _hasHydrated: state }),
     }),
     {
@@ -28,7 +32,6 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {

@@ -1,5 +1,4 @@
 import { RegisterPayload, AuthResponse, User } from "@/types/auth";
-import { useAuthStore } from "@/lib/store/useAuthStore";
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(path, {
@@ -13,10 +12,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 }
 
 async function get<T>(path: string): Promise<T> {
-  const token = useAuthStore.getState().token;
-  const res = await fetch(path, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
+  const res = await fetch(path);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error((json as { message?: string }).message ?? `HTTP ${res.status}`);
   return json as T;
@@ -24,7 +20,7 @@ async function get<T>(path: string): Promise<T> {
 
 export const authService = {
   login: (email: string, password: string) =>
-    post<AuthResponse>("/auth/login", { email, password }),
+    post<Omit<AuthResponse, "token">>("/auth/login", { email, password }),
 
   sendCode: (email: string) =>
     post<{ message: string }>("/auth/send-code", { email }),
@@ -36,7 +32,7 @@ export const authService = {
     post<{ available: boolean }>("/auth/check-nickname", { nickname }),
 
   register: (data: RegisterPayload) =>
-    post<AuthResponse>("/auth/register", data),
+    post<Omit<AuthResponse, "token">>("/auth/register", data),
 
   getMe: () =>
     get<User>("/users/me"),
