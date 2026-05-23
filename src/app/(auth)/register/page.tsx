@@ -157,7 +157,7 @@ export default function RegisterPage() {
         password,
         nickname: data.nickname,
         department: data.department,
-        admission_year: data.admissionYear,
+        admissionYear: data.admissionYear,
         category: selectedCategories,
       });
       setAuth(user, token);

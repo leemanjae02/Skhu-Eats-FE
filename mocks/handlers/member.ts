@@ -13,7 +13,7 @@ interface VerifyCodeBody { email: string; code: string }
 interface CheckNicknameBody { nickname: string }
 interface RegisterBody {
   email: string; password: string; nickname: string;
-  department: string; admission_year: string;
+  department: string; admissionYear: string;
   bio?: string; category?: string[];
 }
 
@@ -113,7 +113,7 @@ export const memberHandlers = [
       password: body.password,
       nickname: body.nickname,
       department: body.department,
-      admissionYear: body.admission_year,
+      admissionYear: body.admissionYear,
       avatar: null,
       bio: body.bio,
       category: body.category,

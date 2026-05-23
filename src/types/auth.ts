@@ -20,7 +20,7 @@ export interface RegisterPayload {
   password: string;
   nickname: string;
   department: string;
-  admission_year: string;
+  admissionYear: string;
   bio?: string;
   category?: string[];
 }
