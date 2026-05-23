@@ -1,6 +1,6 @@
 import "server-only";
 
-const BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
+const BASE = (process.env.API_BASE_URL ?? "").replace(/\/$/, "");
 
 function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
   if (!headers) return {};
@@ -20,7 +20,7 @@ export async function serverFetch<T = unknown>(
   init?: RequestInit,
 ): Promise<T> {
   if (!BASE)
-    throw new Error("[serverFetch] NEXT_PUBLIC_API_BASE_URL is not configured");
+    throw new Error("[serverFetch] API_BASE_URL is not configured");
 
   const method = (init?.method ?? "GET").toUpperCase();
   const isSafeMethod = ["GET", "HEAD"].includes(method);
@@ -55,13 +55,14 @@ export async function serverFetchRaw(
   init?: RequestInit,
 ): Promise<{ status: number; data: unknown }> {
   if (!BASE)
-    throw new Error("[serverFetch] NEXT_PUBLIC_API_BASE_URL is not configured");
+    throw new Error("[serverFetch] API_BASE_URL is not configured");
 
   const method = (init?.method ?? "GET").toUpperCase();
   const isSafeMethod = ["GET", "HEAD"].includes(method);
+  const isFormData = init?.body instanceof FormData;
 
   const headers: Record<string, string> = {
-    ...(!isSafeMethod ? { "Content-Type": "application/json" } : {}),
+    ...(!isSafeMethod && !isFormData ? { "Content-Type": "application/json" } : {}),
     ...normalizeHeaders(init?.headers),
     ...buildAuthHeaders(token),
   };
@@ -72,7 +73,6 @@ export async function serverFetchRaw(
     headers,
   };
 
-  // Ensure body is not present for GET/HEAD
   if (isSafeMethod) {
     delete fetchOptions.body;
   }
