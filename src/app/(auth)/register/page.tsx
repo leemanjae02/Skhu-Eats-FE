@@ -112,7 +112,11 @@ export default function RegisterPage() {
     setCodeError("");
     setCodeLoading(true);
     try {
-      await authService.verifyCode(`${emailId}@skhu.ac.kr`, code);
+      const result = await authService.verifyCode(`${emailId}@skhu.ac.kr`, code);
+      if (!result.verified) {
+        setCodeError("인증코드가 올바르지 않아요.");
+        return;
+      }
       setCodeVerified(true);
     } catch {
       setCodeError("인증코드가 올바르지 않아요.");
@@ -152,7 +156,7 @@ export default function RegisterPage() {
     setApiError("");
     const { emailId, password } = getStep1Values();
     try {
-      const { user, token } = await authService.register({
+      const { user } = await authService.register({
         email: `${emailId}@skhu.ac.kr`,
         password,
         nickname: data.nickname,
@@ -160,7 +164,7 @@ export default function RegisterPage() {
         admissionYear: data.admissionYear,
         category: selectedCategories,
       });
-      setAuth(user, token);
+      setAuth(user);
       router.replace("/");
     } catch {
       setApiError("회원가입에 실패했어요. 다시 시도해주세요.");
@@ -292,9 +296,11 @@ export default function RegisterPage() {
                     확인
                   </Button>
                 </div>
-                <p className="text-[12px] text-grey-400 px-1">
-                  테스트 코드: <strong className="text-grey-700">123456</strong>
-                </p>
+                {process.env.NODE_ENV === "development" && (
+                  <p className="text-[12px] text-grey-400 px-1">
+                    테스트 코드: <strong className="text-grey-700">123456</strong>
+                  </p>
+                )}
               </div>
             )}
 

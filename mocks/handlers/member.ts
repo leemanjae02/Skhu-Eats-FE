@@ -137,7 +137,7 @@ export const memberHandlers = [
     const authHeader = request.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");
     const email = token ? activeSessions.get(token) : undefined;
-    const user = email ? members.find((m) => m.email === email) : members[0];
+    const user = email ? members.find((m) => m.email === email) : undefined;
     if (!user) return new HttpResponse(null, { status: 401 });
     return HttpResponse.json(sanitizeUser(user));
   }),
