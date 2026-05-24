@@ -1,3 +1,5 @@
-import { exampleHandlers } from "./handlers/example";
+import { memberHandlers } from "./handlers/member";
 
-export const handlers = [...exampleHandlers];
+export const handlers = [
+  ...memberHandlers
+];

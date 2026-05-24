@@ -14,7 +14,6 @@ interface CardProps {
   maxParticipants: number;
   avatars?: string[];
   className?: string;
-  urgent?: boolean;
 }
 
 export function Card({
@@ -28,13 +27,12 @@ export function Card({
   maxParticipants,
   avatars = [],
   className,
-  urgent = false,
 }: CardProps) {
   return (
     <div
       className={cn(
         "bg-cream-50 border border-grey-200 rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform",
-        urgent && "border-l-[3px] border-l-red-500",
+        status === "urgent" && "border-l-[3px] border-l-red-500",
         className
       )}
     >

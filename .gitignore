@@ -40,6 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# claude  
+# claude
 .omc
 .claude
+
+# playwright
+.playwright-mcp/
+playwright-report/
+test-results/

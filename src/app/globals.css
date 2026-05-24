@@ -1,7 +1,33 @@
 @import "tailwindcss";
 @import "../styles/globals.css";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary-500);
+  --color-primary-foreground: var(--grey-900);
+
+  --color-secondary: var(--grey-100);
+  --color-secondary-foreground: var(--grey-900);
+
+  --color-muted: var(--grey-100);
+  --color-muted-foreground: var(--grey-500);
+
+  --color-accent: var(--primary-100);
+  --color-accent-foreground: var(--primary-700);
+
+  --color-destructive: var(--red-500);
+  --color-destructive-foreground: var(--white);
+
+  --color-border: var(--grey-200);
+  --color-input: var(--grey-200);
+  --color-ring: var(--primary-500);
+
   --color-primary-50: var(--primary-50);
   --color-primary-100: var(--primary-100);
   --color-primary-200: var(--primary-200);
@@ -52,11 +78,34 @@
 :root {
   --background: var(--white);
   --foreground: var(--grey-900);
+  --card: var(--white);
+  --card-foreground: var(--grey-900);
+  --popover: var(--white);
+  --popover-foreground: var(--grey-900);
+  --primary: var(--primary-500);
+  --primary-foreground: var(--grey-900);
+  --secondary: var(--grey-100);
+  --secondary-foreground: var(--grey-900);
+  --muted: var(--grey-100);
+  --muted-foreground: var(--grey-500);
+  --accent: var(--primary-100);
+  --accent-foreground: var(--primary-700);
+  --destructive: var(--red-500);
+  --destructive-foreground: var(--white);
+  --border: var(--grey-200);
+  --input: var(--grey-200);
+  --ring: var(--primary-500);
+  --radius: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: var(--grey-900);
-    --foreground: var(--grey-50);
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }

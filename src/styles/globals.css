@@ -42,7 +42,111 @@ body {
 }
 
 /* =============================================
-   UTILITY CLASSES (From Design v3)
+   TOP BAR
+============================================= */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 16px 4px 12px;
+  height: 52px;
+  background: var(--white);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+  border-bottom: 1px solid var(--grey-100);
+}
+.top-bar .bar-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.top-bar .logo-pill {
+  width: 30px; height: 30px;
+  background: var(--primary-500);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.top-bar .logo-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--grey-900);
+  letter-spacing: -0.4px;
+}
+.top-bar .bar-btn {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; cursor: pointer; flex-shrink: 0;
+}
+.top-bar .bar-title {
+  font-size: 17px; font-weight: 600; color: var(--grey-900);
+  letter-spacing: -0.3px; flex: 1; text-align: center;
+}
+.top-bar .bar-action {
+  font-size: 14px; font-weight: 500; color: var(--grey-600);
+  padding: 6px 10px; cursor: pointer;
+}
+
+/* =============================================
+   BOTTOM NAV
+============================================= */
+.bottom-nav {
+  background: var(--white);
+  border-top: 1px solid var(--grey-200);
+  display: flex;
+  align-items: flex-end;
+  padding: 8px 0 22px;
+  flex-shrink: 0;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 3px; padding-top: 4px; cursor: pointer;
+}
+.nav-item i, .nav-item svg { color: var(--grey-400); }
+.nav-item.active i, .nav-item.active svg { color: var(--primary-600); }
+.nav-label { font-size: 10px; font-weight: 600; color: var(--grey-400); letter-spacing: 0.2px; }
+.nav-item.active .nav-label { color: var(--primary-600); }
+.nav-fab-wrap {
+  flex: 1; display: flex; justify-content: center; align-items: flex-end;
+  position: relative; top: -14px;
+}
+.nav-fab {
+  width: 52px; height: 52px; border-radius: 9999px;
+  background: var(--primary-500); box-shadow: var(--shadow-glow);
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-fab i, .nav-fab svg { color: var(--grey-900); }
+
+/* =============================================
+   INPUT — borderless, grey-100 fill, r=14px
+============================================= */
+.input-label-group { margin-bottom: 20px; }
+.input-caption {
+  font-size: 11px; font-weight: 700; color: var(--grey-500);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  margin-bottom: 6px; display: block;
+}
+.input-row {
+  position: relative; display: flex; align-items: center;
+}
+.input-field {
+  width: 100%; height: 52px; padding: 0 16px;
+  background: var(--grey-100); border: none; border-radius: 14px;
+  font-family: var(--font); font-size: 16px; font-weight: 400;
+  color: var(--grey-900); outline: none; transition: background 0.15s;
+}
+.input-field:focus { background: var(--grey-200); }
+.input-field::placeholder { color: var(--grey-400); }
+
+.input-timer {
+  position: absolute; right: 16px;
+  font-size: 14px; font-weight: 700; color: var(--red-500);
+  letter-spacing: -0.3px;
+}
+
+/* =============================================
+   UTILITY CLASSES
 ============================================= */
 
 /* Badges */
@@ -84,10 +188,16 @@ body {
   transition: background 0.15s;
 }
 .btn-primary:hover { background: var(--primary-400); }
+
+/* Combined disabled states to avoid flash/blink issues */
+.btn-primary:disabled, 
 .btn-primary.disabled {
-  background: var(--grey-200); color: var(--grey-500);
-  cursor: not-allowed; box-shadow: none;
+  background: var(--grey-200) !important; 
+  color: var(--grey-500) !important;
+  cursor: not-allowed; 
+  box-shadow: none !important;
 }
+
 .btn-weak-primary {
   display: block; width: 100%; height: 54px;
   background: var(--primary-100); color: var(--primary-700);
@@ -95,12 +205,21 @@ body {
   border: none; border-radius: var(--r-full); cursor: pointer;
   letter-spacing: -0.2px;
 }
+.btn-weak-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-weak-danger {
   display: block; width: 100%; height: 54px;
   background: var(--red-50); color: var(--red-500);
   font-family: var(--font); font-size: 17px; font-weight: 600;
   border: none; border-radius: var(--r-full); cursor: pointer;
   letter-spacing: -0.2px;
+}
+.btn-weak-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Animations */
