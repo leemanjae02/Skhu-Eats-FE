@@ -32,7 +32,7 @@ export interface MemberData {
   password: string;
   nickname: string;
   department: string;
-  admissionYear: string;
+  admission_year: string;
   avatar: string | null;
   bio: string;
   category: string[];
@@ -50,7 +50,7 @@ export function createMember(overrides?: Partial<MemberData>): MemberData {
     password: "test1234!",
     nickname: faker.helpers.arrayElement(NICKNAME_POOL),
     department: faker.helpers.arrayElement(DEPARTMENTS),
-    admissionYear: String(year),
+    admission_year: String(year),
     avatar: faker.helpers.arrayElement(AVATARS),
     bio: faker.helpers.arrayElement(BIOS),
     category: faker.helpers.arrayElements(FOOD_CATEGORIES, { min: 1, max: 3 }),
