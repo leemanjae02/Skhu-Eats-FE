@@ -4,7 +4,7 @@ export interface User {
   nickname: string;
   avatar: string | null;
   department?: string;
-  admissionYear?: string;
+  admission_year?: string;
   bio?: string;
   category?: string[];
 }
@@ -12,7 +12,8 @@ export interface User {
 export interface AuthResponse {
   message: string;
   user: User;
-  token: string;
+  access_token: string;
+  refresh_token?: string;
 }
 
 export interface RegisterPayload {
@@ -20,7 +21,7 @@ export interface RegisterPayload {
   password: string;
   nickname: string;
   department: string;
-  admissionYear: string;
+  admission_year: string;
   bio?: string;
   category?: string[];
 }
