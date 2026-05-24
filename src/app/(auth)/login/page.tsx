@@ -126,9 +126,9 @@ export default function LoginPage() {
             <Input
               {...register("password", {
                 required: "비밀번호를 입력해주세요",
-                minLength: {
-                  value: 8,
-                  message: "비밀번호는 8자 이상이어야 해요",
+                pattern: {
+                  value: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/,
+                  message: "영문, 숫자, 특수문자(@$!%*#?&)를 포함해 8자 이상 입력해주세요",
                 },
               })}
               type="password"

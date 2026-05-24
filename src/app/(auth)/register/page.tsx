@@ -130,8 +130,8 @@ export default function RegisterPage() {
     if (!nickname) return;
     setNicknameLoading(true);
     try {
-      await authService.checkNickname(nickname);
-      setNicknameStatus("ok");
+      const { available } = await authService.checkNickname(nickname);
+      setNicknameStatus(available ? "ok" : "taken");
     } catch {
       setNicknameStatus("taken");
     } finally {
@@ -161,7 +161,7 @@ export default function RegisterPage() {
         password,
         nickname: data.nickname,
         department: data.department,
-        admissionYear: data.admissionYear,
+        admission_year: data.admissionYear,
         category: selectedCategories,
       });
       setAuth(user);
