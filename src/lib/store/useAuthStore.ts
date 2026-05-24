@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { User } from "@/types/auth";
+import { authService } from "@/services/auth.service";
 
 interface AuthState {
   user: User | null;
@@ -9,11 +10,12 @@ interface AuthState {
   setAuth: (user: User) => void;
   logout: () => Promise<void>;
   setHasHydrated: (state: boolean) => void;
+  initAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isAuthenticated: false,
       _hasHydrated: false,
@@ -26,6 +28,22 @@ export const useAuthStore = create<AuthState>()(
         }
       },
       setHasHydrated: (state) => set({ _hasHydrated: state }),
+      initAuth: async () => {
+        if (!get().isAuthenticated) return;
+        try {
+          const user = await authService.getMe();
+          set({ user, isAuthenticated: true });
+        } catch {
+          // 쿠키 만료 → refresh 시도
+          try {
+            await authService.refresh();
+            const user = await authService.getMe();
+            set({ user, isAuthenticated: true });
+          } catch {
+            set({ user: null, isAuthenticated: false });
+          }
+        }
+      },
     }),
     {
       name: "auth-storage",

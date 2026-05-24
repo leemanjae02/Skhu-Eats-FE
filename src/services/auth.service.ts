@@ -20,7 +20,7 @@ async function get<T>(path: string): Promise<T> {
 
 export const authService = {
   login: (email: string, password: string) =>
-    post<Omit<AuthResponse, "token">>("/auth/login", { email, password }),
+    post<Omit<AuthResponse, "access_token" | "refresh_token">>("/auth/login", { email, password }),
 
   sendCode: (email: string) =>
     post<{ message: string }>("/auth/send-code", { email }),
@@ -32,7 +32,10 @@ export const authService = {
     post<{ available: boolean }>("/auth/check-nickname", { nickname }),
 
   register: (data: RegisterPayload) =>
-    post<Omit<AuthResponse, "token">>("/auth/register", data),
+    post<Omit<AuthResponse, "access_token" | "refresh_token">>("/auth/register", data),
+
+  refresh: () =>
+    post<{ message: string }>("/auth/refresh", {}),
 
   getMe: () =>
     get<User>("/users/me"),
