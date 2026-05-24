@@ -9,20 +9,30 @@ export async function POST(req: NextRequest) {
   });
 
   const d = data as Record<string, unknown>;
-  if (status !== 200 || !d.token) {
+  if (status < 200 || status >= 300 || !d.access_token) {
     return NextResponse.json(data, { status });
   }
 
-  const { token, ...rest } = d;
+  const { access_token, refresh_token, ...rest } = d;
   const res = NextResponse.json(rest, { status });
 
-  res.cookies.set("auth-token", token as string, {
+  res.cookies.set("auth-token", access_token as string, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });
+
+  if (refresh_token) {
+    res.cookies.set("refresh-token", refresh_token as string, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+  }
 
   return res;
 }

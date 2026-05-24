@@ -9,18 +9,14 @@ export async function POST(req: NextRequest) {
   });
 
   const d = data as Record<string, unknown>;
-  if (status !== 200 && status !== 201) {
+  if (status < 200 || status >= 300 || !d.access_token) {
     return NextResponse.json(data, { status });
   }
 
-  if (!d.token) {
-    return NextResponse.json(data, { status });
-  }
-
-  const { token, ...rest } = d;
+  const { access_token, ...rest } = d;
   const res = NextResponse.json(rest, { status });
 
-  res.cookies.set("auth-token", token as string, {
+  res.cookies.set("auth-token", access_token as string, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
