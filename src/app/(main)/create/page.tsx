@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Minus, Plus, AlertTriangle } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { postService } from "@/services/post.service";
@@ -19,8 +19,12 @@ const CATEGORIES = [
 
 const LOCATION_PRESETS = ["학생회관 1층 식당", "정문 앞 먹자골목", "후문 카페거리"];
 
-export default function CreatePage() {
+function CreatePostForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+  const isEdit = Boolean(editId);
+
   const [step, setStep] = useState<1 | 2>(1);
 
   // step 1
@@ -38,6 +42,33 @@ export default function CreatePage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 수정 모드: 기존 값 prefill
+  useEffect(() => {
+    if (!editId) return;
+    (async () => {
+      try {
+        const p = await postService.getPost(editId);
+        setTitle(p.menu);
+        setCategories(p.food_categories?.length ? p.food_categories : [p.category]);
+        const d = new Date(p.meeting_time);
+        const pad = (n: number) => String(n).padStart(2, "0");
+        setDate(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`);
+        setTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
+        if (LOCATION_PRESETS.includes(p.location)) {
+          setLocation(p.location);
+        } else {
+          setLocation("직접 입력");
+          setCustomLocation(p.location);
+        }
+        setMaxParticipants(p.max_participants);
+        setMemo(p.memo ?? "");
+        setKakaoLink(p.kakao_link ?? "");
+      } catch {
+        setError("모집글을 불러오지 못했어요");
+      }
+    })();
+  }, [editId]);
 
   const toggleCategory = (value: string) => {
     setCategories((prev) =>
@@ -58,7 +89,7 @@ export default function CreatePage() {
     setError(null);
     try {
       const meetingTime = new Date(`${date}T${time}:00`).toISOString();
-      const { post_id } = await postService.createPost({
+      const payload = {
         title: title.trim(),
         food_categories: categories,
         location: resolvedLocation,
@@ -66,10 +97,16 @@ export default function CreatePage() {
         max_participants: maxParticipants,
         memo: memo.trim() || undefined,
         kakao_link: kakaoLink.trim() || undefined,
-      });
-      router.replace(`/post/${post_id}`);
+      };
+      if (isEdit && editId) {
+        await postService.updatePost(editId, payload);
+        router.replace(`/post/${editId}`);
+      } else {
+        const { post_id } = await postService.createPost(payload);
+        router.replace(`/post/${post_id}`);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "모집글 작성에 실패했어요");
+      setError(err instanceof Error ? err.message : "저장에 실패했어요");
       setSubmitting(false);
     }
   };
@@ -77,7 +114,7 @@ export default function CreatePage() {
   return (
     <div className="flex flex-col h-full bg-white">
       <TopBar
-        title="모집하기"
+        title={isEdit ? "모집 수정" : "모집하기"}
         leftAction={
           <button
             onClick={() => (step === 2 ? setStep(1) : router.back())}
@@ -253,12 +290,14 @@ export default function CreatePage() {
               <p className="text-[12px] text-grey-500 mt-1.5">참여 확정 후 참여자에게만 공개됩니다</p>
             </section>
 
-            <div className="flex items-center gap-2.5 p-3.5 bg-orange-50 rounded-xl">
-              <AlertTriangle className="w-[18px] h-[18px] text-orange-500 shrink-0" />
-              <span className="text-[13px] font-semibold text-orange-500">
-                하루 최대 3개까지 모집글을 작성할 수 있어요
-              </span>
-            </div>
+            {!isEdit && (
+              <div className="flex items-center gap-2.5 p-3.5 bg-orange-50 rounded-xl">
+                <AlertTriangle className="w-[18px] h-[18px] text-orange-500 shrink-0" />
+                <span className="text-[13px] font-semibold text-orange-500">
+                  하루 최대 3개까지 모집글을 작성할 수 있어요
+                </span>
+              </div>
+            )}
 
             {error && (
               <p className="text-[13px] font-medium text-red-500 text-center">{error}</p>
@@ -282,10 +321,18 @@ export default function CreatePage() {
             disabled={!step2Valid || submitting}
             className="btn-primary disabled:bg-grey-200 disabled:text-grey-500 disabled:shadow-none"
           >
-            {submitting ? "게시 중…" : "게시하기"}
+            {submitting ? "저장 중…" : isEdit ? "수정 완료" : "게시하기"}
           </button>
         )}
       </div>
     </div>
+  );
+}
+
+export default function CreatePage() {
+  return (
+    <Suspense fallback={<div className="flex-1 bg-white" />}>
+      <CreatePostForm />
+    </Suspense>
   );
 }
