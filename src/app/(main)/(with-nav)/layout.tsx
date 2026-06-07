@@ -1,0 +1,16 @@
+import { BottomNav } from "@/components/layout/BottomNav";
+
+export default function WithNavLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {children}
+      </div>
+      <BottomNav />
+    </>
+  );
+}
