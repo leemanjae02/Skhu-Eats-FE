@@ -1,5 +1,7 @@
 export interface User {
   id: string;
+  /** API 명세 GET /users/me 의 userId (id 와 동일 값) */
+  userId?: string;
   email: string;
   nickname: string;
   avatar: string | null;

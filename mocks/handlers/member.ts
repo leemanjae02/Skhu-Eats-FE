@@ -31,7 +31,8 @@ const activeSessions = new Map<string, { email: string; type: "access" | "refres
 
 const sanitizeUser = (user: Member): User => {
   const { password, ...safeUser } = user;
-  return safeUser;
+  // 명세 GET /users/me: { userId, email, nickname } 포함 (풀 프로필 유지)
+  return { ...safeUser, userId: safeUser.id };
 };
 
 const makeTokens = (email: string) => {
