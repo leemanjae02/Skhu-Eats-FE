@@ -1,11 +1,12 @@
 import { http, HttpResponse } from "msw";
-import membersData from "../data/members.json";
-import { createMembers } from "../factories/member.factory";
-import { User } from "@/types/auth";
-
-interface Member extends User {
-  password: string;
-}
+import {
+  Member,
+  members,
+  pendingCodes,
+  activeSessions,
+  sanitizeUser,
+  makeTokens,
+} from "../store";
 
 interface LoginBody { email: string; password: string }
 interface SendCodeBody { email: string }
@@ -17,31 +18,6 @@ interface RegisterBody {
   bio?: string; category?: string[];
 }
 interface RefreshBody { refresh_token: string }
-
-const members: Member[] = [
-  ...membersData.map(m => ({
-    ...m,
-    avatar: m.avatar || null
-  })),
-  ...createMembers(10)
-];
-
-const pendingCodes = new Map<string, string>();
-const activeSessions = new Map<string, { email: string; type: "access" | "refresh" }>();
-
-const sanitizeUser = (user: Member): User => {
-  const { password, ...safeUser } = user;
-  // 명세 GET /users/me: { userId, email, nickname } 포함 (풀 프로필 유지)
-  return { ...safeUser, userId: safeUser.id };
-};
-
-const makeTokens = (email: string) => {
-  const access_token = `mock-access-${Math.random().toString(36).slice(2, 11)}`;
-  const refresh_token = `mock-refresh-${Math.random().toString(36).slice(2, 11)}`;
-  activeSessions.set(access_token, { email, type: "access" });
-  activeSessions.set(refresh_token, { email, type: "refresh" });
-  return { access_token, refresh_token };
-};
 
 export const memberHandlers = [
   // Auth: Login

@@ -16,6 +16,10 @@ export const postService = {
   getPost: (id: string) =>
     fetchApi<Post>(`/posts/${id}`),
 
+  // 내 모임 목록 — created(내가 만든) / joined(참여 중)
+  getMyPosts: (type: "created" | "joined" = "created") =>
+    fetchApi<Post[]>(`/users/me/posts${type === "joined" ? "?type=joined" : ""}`),
+
   createPost: (data: CreatePostPayload) =>
     fetchApi<CreatePostResponse>("/posts", {
       method: "POST",

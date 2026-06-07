@@ -1,7 +1,24 @@
 import { http, HttpResponse } from "msw";
 import { createPosts, createPost, PostData } from "../factories/post.factory";
+import { userFromAuthHeader } from "../store";
 
 const posts: PostData[] = createPosts(10);
+// 데모: 초기 글 일부를 첫 번째 회원(밥순이)이 만든 글로 지정
+posts.slice(0, 2).forEach((p) => {
+  p.host_id = "1";
+  p.host_nickname = "밥순이";
+});
+
+// 유저별 참여(joined) 모집글 추적 (userId → Set<postId>)
+const joinedByUser = new Map<string, Set<string>>();
+const joinedSet = (userId: string) => {
+  let set = joinedByUser.get(userId);
+  if (!set) {
+    set = new Set();
+    joinedByUser.set(userId, set);
+  }
+  return set;
+};
 
 const CATEGORY_THUMBNAILS: Record<string, string> = {
   한식: "🍲",
@@ -36,8 +53,8 @@ let dailyCreatedCount = 0;
 const DAILY_LIMIT = 3;
 
 export const postHandlers = [
-  // Posts: List — GET /posts
-  http.get(/\/posts(\?.*)?$/, ({ request }) => {
+  // Posts: List — GET /posts (호스트 직후 /posts 만 매칭, /users/me/posts 제외)
+  http.get(/\/\/[^/]+\/posts(\?.*)?$/, ({ request }) => {
     const url = new URL(request.url);
     const category = url.searchParams.get("category");
     const status = url.searchParams.get("status");
@@ -74,6 +91,8 @@ export const postHandlers = [
     if (post.current_participants >= post.max_participants) {
       post.status = "closed";
     }
+    const user = userFromAuthHeader(request.headers.get("Authorization"));
+    if (user && id) joinedSet(user.id).add(id);
     return HttpResponse.json({ message: "참여 신청이 완료됐어요" });
   }),
 
@@ -88,7 +107,21 @@ export const postHandlers = [
         post.status = "active";
       }
     }
+    const user = userFromAuthHeader(request.headers.get("Authorization"));
+    if (user && id) joinedSet(user.id).delete(id);
     return HttpResponse.json({ message: "참여 취소가 완료됐어요" });
+  }),
+
+  // Users: 내 모임 목록 — GET /users/me/posts (?type=joined → 참여 중)
+  http.get(/\/users\/me\/posts(\?.*)?$/, ({ request }) => {
+    const user = userFromAuthHeader(request.headers.get("Authorization"));
+    if (!user) return new HttpResponse(null, { status: 401 });
+    const type = new URL(request.url).searchParams.get("type");
+    if (type === "joined") {
+      const set = joinedSet(user.id);
+      return HttpResponse.json(posts.filter((p) => set.has(p.id)));
+    }
+    return HttpResponse.json(posts.filter((p) => p.host_id === user.id));
   }),
 
   // Posts: Detail — GET /posts/:id
@@ -100,7 +133,7 @@ export const postHandlers = [
   }),
 
   // Posts: Create — POST /posts
-  http.post(/\/posts(\?.*)?$/, async ({ request }) => {
+  http.post(/\/\/[^/]+\/posts(\?.*)?$/, async ({ request }) => {
     const body = (await request.json()) as CreatePostBody;
 
     if (dailyCreatedCount >= DAILY_LIMIT) {
@@ -115,6 +148,7 @@ export const postHandlers = [
 
     const food = body.food_categories ?? [];
     const primary = food[0] ?? "한식";
+    const host = userFromAuthHeader(request.headers.get("Authorization"));
     const newPost = createPost({
       menu: body.title,
       category: primary,
@@ -127,6 +161,7 @@ export const postHandlers = [
       kakao_link: body.kakao_link,
       current_participants: 1, // 작성자
       status: "active",
+      ...(host ? { host_id: host.id, host_nickname: host.nickname } : {}),
     });
     posts.unshift(newPost);
     dailyCreatedCount += 1;
