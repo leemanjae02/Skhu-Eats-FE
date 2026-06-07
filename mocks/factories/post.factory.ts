@@ -22,16 +22,18 @@ const MEMOS = [
 export interface PostData {
   id: string;
   host_id: string;
-  thumbnail: string;
+  host_nickname: string;
+  menu: string;
   category: string;
-  title: string;
-  location: string;
+  food_categories?: string[];
+  thumbnail: string;
   meeting_time: string;
+  location: string;
+  memo?: string;
   max_participants: number;
   current_participants: number;
   status: "active" | "urgent" | "closed";
-  deadline: string;
-  memo?: string;
+  created_at: string;
   kakao_link?: string;
 }
 
@@ -39,27 +41,29 @@ let _id = 100;
 
 export function createPost(overrides?: Partial<PostData>): PostData {
   const group = faker.helpers.arrayElement(FOOD_GROUPS);
-  const maxParticipants = faker.number.int({ min: 2, max: 6 });
+  const maxParticipants = faker.number.int({ min: 2, max: 4 });
   const currentParticipants = faker.number.int({ min: 1, max: maxParticipants });
   const meetingTime = faker.date.soon({ days: 1 });
-  const deadline = new Date(meetingTime.getTime() - 30 * 60 * 1000);
+  const createdAt = faker.date.recent({ days: 2 });
 
   const isClosed = currentParticipants >= maxParticipants;
-  const isUrgent = !isClosed && deadline.getTime() - Date.now() < 30 * 60 * 1000;
+  const isUrgent = !isClosed && (meetingTime.getTime() - Date.now() < 60 * 60 * 1000);
   const status: PostData["status"] = isClosed ? "closed" : isUrgent ? "urgent" : "active";
 
   return {
     id: String(++_id),
     host_id: String(faker.number.int({ min: 1, max: 10 })),
+    host_nickname: faker.person.firstName(),
     thumbnail: group.thumbnail,
     category: group.category,
-    title: faker.helpers.arrayElement(group.menus),
+    food_categories: [group.category],
+    menu: faker.helpers.arrayElement(group.menus),
     location: faker.helpers.arrayElement(LOCATIONS),
     meeting_time: meetingTime.toISOString(),
     max_participants: maxParticipants,
     current_participants: currentParticipants,
     status,
-    deadline: deadline.toISOString(),
+    created_at: createdAt.toISOString(),
     memo: faker.datatype.boolean(0.5)
       ? faker.helpers.arrayElement(MEMOS)
       : undefined,
