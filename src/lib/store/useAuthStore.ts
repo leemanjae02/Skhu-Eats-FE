@@ -9,6 +9,7 @@ interface AuthState {
   _hasHydrated: boolean;
   setAuth: (user: User) => void;
   logout: () => Promise<void>;
+  withdraw: () => Promise<void>;
   setHasHydrated: (state: boolean) => void;
   initAuth: () => Promise<void>;
 }
@@ -22,6 +23,15 @@ export const useAuthStore = create<AuthState>()(
       setAuth: (user) => set({ user, isAuthenticated: true }),
       logout: async () => {
         try {
+          await fetch("/auth/logout", { method: "POST" });
+        } finally {
+          set({ user: null, isAuthenticated: false });
+        }
+      },
+      withdraw: async () => {
+        try {
+          await authService.withdraw();
+          // 쿠키(auth-token/refresh-token) 정리
           await fetch("/auth/logout", { method: "POST" });
         } finally {
           set({ user: null, isAuthenticated: false });

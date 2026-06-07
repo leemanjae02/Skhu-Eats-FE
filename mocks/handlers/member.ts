@@ -6,6 +6,7 @@ import {
   activeSessions,
   sanitizeUser,
   makeTokens,
+  userFromAuthHeader,
 } from "../store";
 
 interface LoginBody { email: string; password: string }
@@ -139,5 +140,23 @@ export const memberHandlers = [
     const user = members.find(m => m.email === session.email);
     if (!user) return new HttpResponse(null, { status: 401 });
     return HttpResponse.json(sanitizeUser(user));
+  }),
+
+  // Member: 회원 탈퇴 — DELETE /users/me (Hard Delete + 토큰 폐기, 204)
+  http.delete(/\/users\/me$/, ({ request }) => {
+    const user = userFromAuthHeader(request.headers.get("Authorization"));
+    if (!user) return new HttpResponse(null, { status: 401 });
+
+    // User 행 실제 삭제
+    const idx = members.findIndex((m) => m.id === user.id);
+    if (idx === -1) return new HttpResponse(null, { status: 404 });
+    members.splice(idx, 1);
+
+    // 해당 사용자의 access/refresh 토큰 모두 폐기
+    for (const [token, session] of activeSessions) {
+      if (session.email === user.email) activeSessions.delete(token);
+    }
+
+    return new HttpResponse(null, { status: 204 });
   }),
 ];

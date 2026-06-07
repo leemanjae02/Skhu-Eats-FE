@@ -26,6 +26,10 @@ export async function proxyRequest(req: NextRequest): Promise<NextResponse> {
     if (body !== undefined) fetchOptions.body = body;
 
     const { status, data } = await serverFetchRaw(url, token, fetchOptions);
+    // 204 No Content / 304 는 본문을 가질 수 없음
+    if (status === 204 || status === 304) {
+      return new NextResponse(null, { status });
+    }
     return NextResponse.json(data, { status });
   } catch (error) {
     console.error("[Proxy] Error:", error);

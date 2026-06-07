@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,7 +8,14 @@ import { Settings, Utensils, Crown, Bell, Lock, FileText, ChevronRight } from "l
 import { Badge } from "@/components/ui/badge";
 
 export default function ProfilePage() {
-  const { user, logout } = useAuthStore();
+  const router = useRouter();
+  const { user, logout, withdraw } = useAuthStore();
+
+  const handleWithdraw = async () => {
+    if (!window.confirm("정말 탈퇴할까요?\n모든 정보가 삭제되며 되돌릴 수 없어요.")) return;
+    await withdraw();
+    router.replace("/login");
+  };
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -120,12 +128,18 @@ export default function ProfilePage() {
            ))}
         </section>
 
-        <section className="px-5 py-8 bg-white">
+        <section className="px-5 py-8 bg-white flex flex-col items-center gap-4">
           <button
             onClick={logout}
             className="btn-weak-danger w-full h-12 text-[15px] font-semibold"
           >
             로그아웃
+          </button>
+          <button
+            onClick={handleWithdraw}
+            className="text-[13px] font-medium text-grey-400 underline underline-offset-2"
+          >
+            회원 탈퇴
           </button>
         </section>
       </main>
