@@ -64,8 +64,8 @@ export default function HomePage() {
     <div className="flex flex-col h-full bg-white">
       <TopBar showLogo rightAction={rightAction} />
 
-      <main className="flex-1 overflow-y-auto no-scrollbar">
-        <section className="px-5 py-6 bg-white">
+      <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col">
+        <section className="px-5 py-6 bg-white shrink-0">
           <h1 className="text-2xl font-bold text-grey-900 leading-8 tracking-tight">
             {user?.nickname}님,
             <br />
@@ -88,9 +88,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="h-2 bg-grey-100" />
+        <div className="h-2 bg-grey-100 shrink-0" />
 
-        <section className="px-5 py-3 flex gap-2 overflow-x-auto no-scrollbar bg-white sticky top-0 z-10 border-b border-grey-50">
+        <section className="px-5 py-3 flex gap-2 overflow-x-auto no-scrollbar bg-white sticky top-0 z-10 border-b border-grey-50 shrink-0">
           {FILTERS.map((filter) => (
             <Chip
               key={filter}
@@ -102,7 +102,7 @@ export default function HomePage() {
           ))}
         </section>
 
-        <section className="flex-1 bg-grey-50 px-5 py-4 space-y-2.5 min-h-screen">
+        <section className="flex-1 bg-grey-50 px-5 py-4 space-y-2.5">
           {isLoading ? (
             <div className="py-20 text-center text-grey-400 text-sm font-medium">
               밥친구를 찾고 있어요...
