@@ -1,4 +1,4 @@
-import { RegisterPayload, AuthResponse, User } from "@/types/auth";
+import { RegisterPayload, AuthResponse, User, UpdateProfilePayload } from "@/types/auth";
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(path, {
@@ -26,6 +26,17 @@ async function del(path: string): Promise<void> {
   }
 }
 
+async function put<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(path, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((json as { message?: string }).message ?? `HTTP ${res.status}`);
+  return json as T;
+}
+
 export const authService = {
   login: (email: string, password: string) =>
     post<Omit<AuthResponse, "access_token" | "refresh_token">>("/auth/login", { email, password }),
@@ -47,6 +58,9 @@ export const authService = {
 
   getMe: () =>
     get<User>("/users/me"),
+
+  updateProfile: (data: UpdateProfilePayload) =>
+    put<User>("/users", data),
 
   withdraw: () =>
     del("/users/me"),

@@ -18,6 +18,11 @@ export interface AuthResponse {
   refresh_token?: string;
 }
 
+/** PUT /users — 내 프로필 수정 요청 본문 (명세: 닉네임만 수정) */
+export interface UpdateProfilePayload {
+  nickname: string;
+}
+
 export interface RegisterPayload {
   email: string;
   password: string;

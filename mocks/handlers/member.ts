@@ -142,6 +142,38 @@ export const memberHandlers = [
     return HttpResponse.json(sanitizeUser(user));
   }),
 
+  // Member: 프로필 수정 — PUT /users (명세: 닉네임만 수정)
+  http.put(/\/users(\?.*)?$/, async ({ request }) => {
+    const user = userFromAuthHeader(request.headers.get("Authorization"));
+    if (!user) {
+      return HttpResponse.json(
+        { code: "AUTH_401_TOKEN_REQUIRED", message: "로그인이 필요해요" },
+        { status: 401 },
+      );
+    }
+
+    const body = (await request.json().catch(() => ({}))) as { nickname?: string };
+    if (typeof body.nickname !== "string" || body.nickname.trim().length === 0) {
+      return HttpResponse.json(
+        { code: "INVALID_REQUEST", message: "입력값 형식이 올바르지 않아요" },
+        { status: 400 },
+      );
+    }
+
+    const nickname = body.nickname.trim();
+    const taken = members.some((m) => m.id !== user.id && m.nickname === nickname);
+    if (taken) {
+      return HttpResponse.json(
+        { code: "USER_409_NICK", message: "이미 사용 중인 닉네임이에요" },
+        { status: 409 },
+      );
+    }
+
+    user.nickname = nickname;
+    // 명세 응답: { userId, email, nickname } (풀 프로필 유지하여 화면 정보 보존)
+    return HttpResponse.json(sanitizeUser(user));
+  }),
+
   // Member: 회원 탈퇴 — DELETE /users/me (Hard Delete + 토큰 폐기, 204)
   http.delete(/\/users\/me$/, ({ request }) => {
     const user = userFromAuthHeader(request.headers.get("Authorization"));
