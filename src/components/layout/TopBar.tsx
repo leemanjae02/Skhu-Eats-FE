@@ -1,5 +1,4 @@
 import { Utensils } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface TopBarProps {
   title?: string;

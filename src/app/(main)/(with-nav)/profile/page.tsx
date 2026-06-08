@@ -15,6 +15,10 @@ const formatMonthDay = (iso: string) => {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 };
 
+// avatar 값이 실제 이미지 URL일 때만 src 로 사용 (목업 데이터는 이모지라 그대로 두면 404)
+const avatarSrc = (avatar?: string | null) =>
+  avatar && /^(https?:\/\/|\/)/.test(avatar) ? avatar : undefined;
+
 export default function ProfilePage() {
   const router = useRouter();
   const { user, logout, withdraw } = useAuthStore();
@@ -64,7 +68,7 @@ export default function ProfilePage() {
         <section className="px-5 py-6 bg-white">
           <div className="flex items-center gap-4 mb-4">
             <Avatar className="w-14 h-14 border-2 border-primary-100">
-              <AvatarImage src={user?.avatar || undefined} />
+              <AvatarImage src={avatarSrc(user?.avatar)} />
               <AvatarFallback className="bg-primary-200 text-primary-700 text-xl font-bold">
                 {user?.nickname?.[0] || "U"}
               </AvatarFallback>
