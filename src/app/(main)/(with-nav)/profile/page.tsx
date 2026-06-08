@@ -1,15 +1,48 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, Utensils, Crown, Bell, Lock, FileText, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { postService } from "@/services/post.service";
+import { Participation } from "@/types/post";
+
+const formatMonthDay = (iso: string) => {
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+};
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, logout, withdraw } = useAuthStore();
+
+  const [history, setHistory] = useState<Participation[]>([]);
+  const [totalJoined, setTotalJoined] = useState(0);
+  const [createdCount, setCreatedCount] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const [his, mine] = await Promise.all([
+          postService.getHistory(),
+          postService.getMyPosts("created"),
+        ]);
+        if (!alive) return;
+        setHistory(his.items);
+        setTotalJoined(his.total);
+        setCreatedCount(mine.length);
+      } catch {
+        // 비로그인/실패 시 빈 상태 유지
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const handleWithdraw = async () => {
     if (!window.confirm("정말 탈퇴할까요?\n모든 정보가 삭제되며 되돌릴 수 없어요.")) return;
@@ -62,7 +95,10 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <button className="btn-weak-primary w-full h-11 text-[15px] font-semibold">
+          <button
+            onClick={() => router.push("/profile/edit")}
+            className="btn-weak-primary w-full h-11 text-[15px] font-semibold"
+          >
             프로필 수정
           </button>
         </section>
@@ -76,7 +112,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1 font-semibold text-grey-900">총 참여</div>
             <div className="flex items-center gap-1.5 text-grey-900 font-bold">
-              12회 <ChevronRight className="w-4.5 h-4.5 text-grey-400" />
+              {totalJoined}회 <ChevronRight className="w-4.5 h-4.5 text-grey-400" />
             </div>
           </div>
           <div className="flex items-center gap-3.5 px-5 py-4 cursor-pointer active:bg-grey-50">
@@ -85,7 +121,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1 font-semibold text-grey-900">내가 만든 모임</div>
             <div className="flex items-center gap-1.5 text-grey-900 font-bold">
-              5회 <ChevronRight className="w-4.5 h-4.5 text-grey-400" />
+              {createdCount}회 <ChevronRight className="w-4.5 h-4.5 text-grey-400" />
             </div>
           </div>
         </section>
@@ -94,20 +130,26 @@ export default function ProfilePage() {
 
         <section className="bg-white">
            <div className="px-5 py-4 font-bold text-grey-900">참여 이력</div>
-           {[
-             { date: "3/25", menu: "김치찌개 + 공기밥", place: "학생회관 1층" },
-             { date: "3/20", menu: "떡볶이 세트", place: "정문 분식집" },
-             { date: "3/14", menu: "스시로 런치", place: "정문 스시로" },
-           ].map((item, i) => (
-             <div key={i} className="flex items-center justify-between px-5 py-3.5 border-t border-grey-100">
-                <span className="text-[13px] font-medium text-grey-500 w-12">{item.date}</span>
-                <div className="flex-1 px-2">
-                  <div className="text-[15px] font-semibold text-grey-800">{item.menu}</div>
-                  <div className="text-[13px] text-grey-500">{item.place}</div>
-                </div>
-                <Badge variant="closed">완료</Badge>
+           {history.length === 0 ? (
+             <div className="px-5 py-8 text-center text-[14px] text-grey-400">
+               아직 참여한 모임이 없어요
              </div>
-           ))}
+           ) : (
+             history.map((item) => (
+               <div key={item.id} className="flex items-center justify-between px-5 py-3.5 border-t border-grey-100">
+                  <span className="text-[13px] font-medium text-grey-500 w-12">
+                    {formatMonthDay(item.meeting_time)}
+                  </span>
+                  <div className="flex-1 px-2">
+                    <div className="text-[15px] font-semibold text-grey-800">{item.menu}</div>
+                    <div className="text-[13px] text-grey-500">{item.location}</div>
+                  </div>
+                  <Badge variant={item.status === "completed" ? "closed" : "active"}>
+                    {item.status === "completed" ? "완료" : "예정"}
+                  </Badge>
+               </div>
+             ))
+           )}
         </section>
 
         <div className="h-2 bg-grey-100" />

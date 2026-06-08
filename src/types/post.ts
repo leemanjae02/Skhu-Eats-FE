@@ -39,3 +39,21 @@ export interface CreatePostPayload {
 export interface CreatePostResponse {
   post_id: string;
 }
+
+/** GET /users/me/history 항목 (참여 이력) */
+export interface Participation {
+  id: string;
+  post_id: string;
+  menu: string;
+  location: string;
+  meeting_time: string;
+  status: "completed" | "upcoming";
+}
+
+/** GET /users/me/history 응답 (페이지네이션) */
+export interface HistoryResponse {
+  items: Participation[];
+  page: number;
+  limit: number;
+  total: number;
+}

@@ -20,6 +20,37 @@ const joinedSet = (userId: string) => {
   return set;
 };
 
+// 참여 이력 (userId → 참여 기록 목록)
+interface HistoryRecord {
+  id: string;
+  post_id: string;
+  menu: string;
+  location: string;
+  meeting_time: string;
+  status: "completed" | "upcoming";
+}
+const historyByUser = new Map<string, HistoryRecord[]>();
+const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString();
+// 데모: 첫 번째 회원(밥순이)의 지난 참여 이력 시드
+historyByUser.set("1", [
+  { id: "h1", post_id: "201", menu: "김치찌개 + 공기밥", location: "학생회관 1층", meeting_time: daysAgo(3), status: "completed" },
+  { id: "h2", post_id: "202", menu: "떡볶이 세트", location: "정문 분식집", meeting_time: daysAgo(8), status: "completed" },
+  { id: "h3", post_id: "203", menu: "스시로 런치세트", location: "정문 스시로", meeting_time: daysAgo(14), status: "completed" },
+]);
+const pushHistory = (userId: string, post: PostData) => {
+  const list = historyByUser.get(userId) ?? [];
+  if (list.some((h) => h.post_id === post.id)) return;
+  list.unshift({
+    id: `h-${post.id}`,
+    post_id: post.id,
+    menu: post.menu,
+    location: post.location,
+    meeting_time: post.meeting_time,
+    status: new Date(post.meeting_time).getTime() < Date.now() ? "completed" : "upcoming",
+  });
+  historyByUser.set(userId, list);
+};
+
 const CATEGORY_THUMBNAILS: Record<string, string> = {
   한식: "🍲",
   면류: "🍜",
@@ -92,7 +123,10 @@ export const postHandlers = [
       post.status = "closed";
     }
     const user = userFromAuthHeader(request.headers.get("Authorization"));
-    if (user && id) joinedSet(user.id).add(id);
+    if (user && id) {
+      joinedSet(user.id).add(id);
+      pushHistory(user.id, post);
+    }
     return HttpResponse.json({ message: "참여 신청이 완료됐어요" });
   }),
 
@@ -122,6 +156,23 @@ export const postHandlers = [
       return HttpResponse.json(posts.filter((p) => set.has(p.id)));
     }
     return HttpResponse.json(posts.filter((p) => p.host_id === user.id));
+  }),
+
+  // Users: 내 참여 이력 — GET /users/me/history (?page=&limit=)
+  http.get(/\/users\/me\/history(\?.*)?$/, ({ request }) => {
+    const user = userFromAuthHeader(request.headers.get("Authorization"));
+    if (!user) return new HttpResponse(null, { status: 401 });
+    const url = new URL(request.url);
+    const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10) || 1);
+    const limit = Math.max(1, parseInt(url.searchParams.get("limit") ?? "20", 10) || 20);
+    const all = historyByUser.get(user.id) ?? [];
+    const start = (page - 1) * limit;
+    return HttpResponse.json({
+      items: all.slice(start, start + limit),
+      page,
+      limit,
+      total: all.length,
+    });
   }),
 
   // Posts: Detail — GET /posts/:id

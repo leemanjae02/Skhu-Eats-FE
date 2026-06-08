@@ -1,4 +1,4 @@
-import { Post, CreatePostPayload, CreatePostResponse } from "@/types/post";
+import { Post, CreatePostPayload, CreatePostResponse, HistoryResponse } from "@/types/post";
 
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(path, options);
@@ -19,6 +19,10 @@ export const postService = {
   // 내 모임 목록 — created(내가 만든) / joined(참여 중)
   getMyPosts: (type: "created" | "joined" = "created") =>
     fetchApi<Post[]>(`/users/me/posts${type === "joined" ? "?type=joined" : ""}`),
+
+  // 내 참여 이력 (페이지네이션)
+  getHistory: (page = 1, limit = 20) =>
+    fetchApi<HistoryResponse>(`/users/me/history?page=${page}&limit=${limit}`),
 
   createPost: (data: CreatePostPayload) =>
     fetchApi<CreatePostResponse>("/posts", {
