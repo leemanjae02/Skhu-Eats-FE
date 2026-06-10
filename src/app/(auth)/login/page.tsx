@@ -37,7 +37,7 @@ export default function LoginPage() {
     try {
       const fullEmail = emailId.includes("@")
         ? emailId
-        : `${emailId}@skhu.ac.kr`;
+        : `${emailId}@office.skhu.ac.kr`;
       const { user } = await authService.login(fullEmail, password);
       setAuth(user);
       router.replace("/");
@@ -100,7 +100,7 @@ export default function LoginPage() {
                 {...register("emailId", {
                   required: "이메일을 입력해주세요",
                   pattern: {
-                    value: /^[a-zA-Z0-9._-]+(@skhu\.ac\.kr)?$/,
+                    value: /^[a-zA-Z0-9._-]+(@office\.skhu\.ac\.kr)?$/,
                     message: "올바른 학번 또는 이메일을 입력해주세요",
                   },
                 })}
@@ -109,7 +109,7 @@ export default function LoginPage() {
                 disabled={isSubmitting}
               />
               <span className="absolute right-4 text-[13px] font-medium text-grey-400">
-                @skhu.ac.kr
+                @office.skhu.ac.kr
               </span>
             </div>
             {errors.emailId && (
