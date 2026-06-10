@@ -98,7 +98,7 @@ export default function RegisterPage() {
     setCodeError("");
     setCodeLoading(true);
     try {
-      await authService.sendCode(`${emailId}@skhu.ac.kr`);
+      await authService.sendCode(`${emailId}@office.skhu.ac.kr`);
       setCodeSent(true);
     } catch {
       setCodeError("인증코드 발송에 실패했어요.");
@@ -112,11 +112,8 @@ export default function RegisterPage() {
     setCodeError("");
     setCodeLoading(true);
     try {
-      const result = await authService.verifyCode(`${emailId}@skhu.ac.kr`, code);
-      if (!result.verified) {
-        setCodeError("인증코드가 올바르지 않아요.");
-        return;
-      }
+      // 성공 시 200, 코드가 틀리면 4xx 예외 → catch 에서 처리
+      await authService.verifyCode(`${emailId}@office.skhu.ac.kr`, code);
       setCodeVerified(true);
     } catch {
       setCodeError("인증코드가 올바르지 않아요.");
@@ -157,7 +154,7 @@ export default function RegisterPage() {
     const { emailId, password } = getStep1Values();
     try {
       const { user } = await authService.register({
-        email: `${emailId}@skhu.ac.kr`,
+        email: `${emailId}@office.skhu.ac.kr`,
         password,
         nickname: data.nickname,
         department: data.department,
@@ -238,7 +235,7 @@ export default function RegisterPage() {
                   {...reg1("emailId", {
                     required: "이메일을 입력해주세요",
                     pattern: {
-                      value: /^[a-zA-Z0-9._-]+(@skhu\.ac\.kr)?$/,
+                      value: /^[a-zA-Z0-9._-]+(@office\.skhu\.ac\.kr)?$/,
                       message: "올바른 학번 또는 이메일을 입력해주세요",
                     },
                   })}
@@ -252,7 +249,7 @@ export default function RegisterPage() {
                   }}
                 />
                 <span className="absolute right-4 text-[13px] font-medium text-grey-400 pointer-events-none">
-                  @skhu.ac.kr
+                  @office.skhu.ac.kr
                 </span>
               </div>
               {errors1.emailId && (

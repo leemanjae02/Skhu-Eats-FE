@@ -53,7 +53,7 @@ export const memberHandlers = [
   // Auth: Send Code
   http.post(/\/auth\/send-code$/, async ({ request }) => {
     const { email } = (await request.json()) as SendCodeBody;
-    if (!email.endsWith("@skhu.ac.kr")) {
+    if (!email.endsWith("@office.skhu.ac.kr")) {
       return HttpResponse.json({ message: "학교 이메일만 사용 가능해요" }, { status: 400 });
     }
     pendingCodes.set(email, "123456");
@@ -65,7 +65,8 @@ export const memberHandlers = [
     const { email, code } = (await request.json()) as VerifyCodeBody;
     if (pendingCodes.get(email) === code) {
       pendingCodes.delete(email);
-      return HttpResponse.json({ verified: true });
+      // 실제 백엔드 스펙: 200 { message }
+      return HttpResponse.json({ message: "이메일 인증 완료" });
     }
     return HttpResponse.json({ message: "인증코드가 올바르지 않아요" }, { status: 400 });
   }),

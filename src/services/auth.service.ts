@@ -44,8 +44,9 @@ export const authService = {
   sendCode: (email: string) =>
     post<{ message: string }>("/auth/send-code", { email }),
 
+  // 성공 시 200 { message }, 실패 시 4xx → 호출부에서 예외로 판별
   verifyCode: (email: string, code: string) =>
-    post<{ verified: boolean }>("/auth/verify-code", { email, code }),
+    post<{ message: string }>("/auth/verify-code", { email, code }),
 
   checkNickname: (nickname: string) =>
     post<{ available: boolean }>("/auth/check-nickname", { nickname }),
