@@ -12,7 +12,6 @@ import {
 interface LoginBody { email: string; password: string }
 interface SendCodeBody { email: string }
 interface VerifyCodeBody { email: string; code: string }
-interface CheckNicknameBody { nickname: string }
 interface RegisterBody {
   email: string; password: string; nickname: string;
   department: string; admission_year: string;
@@ -71,9 +70,9 @@ export const memberHandlers = [
     return HttpResponse.json({ message: "인증코드가 올바르지 않아요" }, { status: 400 });
   }),
 
-  // Auth: Check Nickname — 스펙대로 항상 200, available: true/false
-  http.post(/\/auth\/check-nickname$/, async ({ request }) => {
-    const { nickname } = (await request.json()) as CheckNicknameBody;
+  // Auth: Check Nickname — GET, nickname 쿼리 파라미터. 항상 200, available: true/false
+  http.get(/\/auth\/check-nickname(\?.*)?$/, ({ request }) => {
+    const nickname = new URL(request.url).searchParams.get("nickname") ?? "";
     const taken = members.some(m => m.nickname === nickname);
     return HttpResponse.json({ available: !taken });
   }),

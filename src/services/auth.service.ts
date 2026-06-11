@@ -49,7 +49,7 @@ export const authService = {
     post<{ message: string }>("/auth/verify-code", { email, code }),
 
   checkNickname: (nickname: string) =>
-    post<{ available: boolean }>("/auth/check-nickname", { nickname }),
+    get<{ available: boolean }>(`/auth/check-nickname?nickname=${encodeURIComponent(nickname)}`),
 
   register: (data: RegisterPayload) =>
     post<Omit<AuthResponse, "access_token" | "refresh_token">>("/auth/register", data),
