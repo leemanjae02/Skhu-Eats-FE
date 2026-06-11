@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { User } from "@/types/auth";
+import { User, UpdateProfilePayload } from "@/types/auth";
 import { authService } from "@/services/auth.service";
 
 interface AuthState {
@@ -9,6 +9,8 @@ interface AuthState {
   _hasHydrated: boolean;
   setAuth: (user: User) => void;
   logout: () => Promise<void>;
+  withdraw: () => Promise<void>;
+  updateProfile: (data: UpdateProfilePayload) => Promise<void>;
   setHasHydrated: (state: boolean) => void;
   initAuth: () => Promise<void>;
 }
@@ -26,6 +28,19 @@ export const useAuthStore = create<AuthState>()(
         } finally {
           set({ user: null, isAuthenticated: false });
         }
+      },
+      withdraw: async () => {
+        try {
+          await authService.withdraw();
+          // 쿠키(auth-token/refresh-token) 정리
+          await fetch("/auth/logout", { method: "POST" });
+        } finally {
+          set({ user: null, isAuthenticated: false });
+        }
+      },
+      updateProfile: async (data) => {
+        const updated = await authService.updateProfile(data);
+        set({ user: updated });
       },
       setHasHydrated: (state) => set({ _hasHydrated: state }),
       initAuth: async () => {

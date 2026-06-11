@@ -46,7 +46,7 @@ export function createMember(overrides?: Partial<MemberData>): MemberData {
 
   return {
     id: String(++_id),
-    email: `${studentNum}@skhu.ac.kr`,
+    email: `${studentNum}@office.skhu.ac.kr`,
     password: "test1234!",
     nickname: faker.helpers.arrayElement(NICKNAME_POOL),
     department: faker.helpers.arrayElement(DEPARTMENTS),
