@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "@/lib/toast";
 import {
   ArrowLeft,
   Share2,
@@ -77,8 +78,10 @@ export default function PostDetailPage() {
         setJoined(true);
         setPost({ ...post, current_participants: post.current_participants + 1 });
       }
-    } catch {
-      // noop — 실패 시 상태 유지
+    } catch (err) {
+      const action = joined ? "참여 취소" : "참여 신청";
+      const reason = err instanceof Error && err.message ? ` ${err.message}` : "";
+      toast.error(`${action}에 실패했어요.${reason}`);
     } finally {
       setActing(false);
     }

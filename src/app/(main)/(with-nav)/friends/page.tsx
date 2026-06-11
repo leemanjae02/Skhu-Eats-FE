@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "@/lib/toast";
 import { TopBar } from "@/components/layout/TopBar";
 import { Badge } from "@/components/ui/badge";
 import { postService } from "@/services/post.service";
@@ -51,8 +52,9 @@ export default function FriendsPage() {
     try {
       await postService.deletePost(id);
       setPosts((prev) => prev.filter((p) => p.id !== id));
-    } catch {
-      // noop
+    } catch (err) {
+      const reason = err instanceof Error && err.message ? ` ${err.message}` : "";
+      toast.error(`삭제에 실패했어요.${reason}`);
     } finally {
       setBusyId(null);
     }
@@ -65,8 +67,9 @@ export default function FriendsPage() {
     try {
       await postService.leavePost(id);
       setPosts((prev) => prev.filter((p) => p.id !== id));
-    } catch {
-      // noop
+    } catch (err) {
+      const reason = err instanceof Error && err.message ? ` ${err.message}` : "";
+      toast.error(`참여 취소에 실패했어요.${reason}`);
     } finally {
       setBusyId(null);
     }
