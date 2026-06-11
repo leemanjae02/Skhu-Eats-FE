@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Bell } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Card } from "@/components/common/Card";
@@ -45,10 +46,10 @@ export default function HomePage() {
   }, [posts]);
 
   const rightAction = (
-    <div className="relative p-2 cursor-pointer">
+    <Link href="/notifications" className="relative p-2">
       <Bell className="w-[22px] h-[22px] text-grey-700" />
       <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-[1.5px] border-white" />
-    </div>
+    </Link>
   );
 
   const formatTime = (isoString: string) => {
