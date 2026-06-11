@@ -1,4 +1,5 @@
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function MainLayout({
   children,
@@ -10,6 +11,7 @@ export default function MainLayout({
       <div className="flex flex-col h-full bg-white">
         {children}
       </div>
+      <Toaster />
     </AuthGuard>
   );
 }
