@@ -36,8 +36,8 @@ export default function ProfilePage() {
           postService.getMyPosts("created"),
         ]);
         if (!alive) return;
-        setHistory(his.items);
-        setTotalJoined(his.total);
+        setHistory(his.data);
+        setTotalJoined(his.total_count);
         setCreatedCount(mine.length);
       } catch {
         // 비로그인/실패 시 빈 상태 유지

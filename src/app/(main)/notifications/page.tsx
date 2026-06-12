@@ -69,13 +69,13 @@ export default function NotificationsPage() {
   useEffect(() => {
     notificationService
       .getNotifications()
-      .then(setNotifications)
+      .then((res) => setNotifications(res.notifications))
       .catch(console.error)
       .finally(() => setIsLoading(false));
   }, []);
 
   const unreadCount = useMemo(
-    () => notifications.filter((n) => !n.is_read).length,
+    () => notifications.filter((n) => !n.read).length,
     [notifications],
   );
 
@@ -83,18 +83,18 @@ export default function NotificationsPage() {
 
   const markRead = async (id: string) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
+      prev.map((n) => (n.notification_id === id ? { ...n, read: true } : n)),
     );
     await notificationService.markRead(id).catch(console.error);
   };
 
   const handleClick = async (notif: Notification) => {
-    if (!notif.is_read) await markRead(notif.id);
-    if (notif.post_id) router.push(`/post/${notif.post_id}`);
+    if (!notif.read) await markRead(notif.notification_id);
+    if (notif.target_id) router.push(`/post/${notif.target_id}`);
   };
 
   const markAllRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     await notificationService.markAllRead().catch(console.error);
   };
 
@@ -138,24 +138,24 @@ export default function NotificationsPage() {
                   const { bg, color, Icon } = ICON_CONFIG[notif.type];
                   return (
                     <div
-                      key={notif.id}
-                      className={cn("notif-row", !notif.is_read && "unread")}
+                      key={notif.notification_id}
+                      className={cn("notif-row", !notif.read && "unread")}
                       onClick={() => handleClick(notif)}
                     >
                       <div className={cn("notif-icon", bg)}>
                         <Icon className={cn("w-5 h-5", color)} />
                       </div>
                       <div className="notif-body">
-                        <div className="notif-title">{notif.message}</div>
-                        {notif.sub_message && (
-                          <div className="notif-desc">{notif.sub_message}</div>
+                        <div className="notif-title">{notif.title}</div>
+                        {notif.message && (
+                          <div className="notif-desc">{notif.message}</div>
                         )}
                         <div className="notif-time">
                           {formatTime(notif.created_at)}
                         </div>
                       </div>
                       <div className="notif-right">
-                        {!notif.is_read && <div className="unread-dot" />}
+                        {!notif.read && <div className="unread-dot" />}
                       </div>
                     </div>
                   );

@@ -49,7 +49,10 @@ export default function PostDetailPage() {
       setIsLoading(true);
       try {
         const data = await postService.getPost(id);
-        if (alive) setPost(data);
+        if (alive) {
+          setPost(data);
+          if (data.join_status !== undefined) setJoined(data.join_status);
+        }
       } catch {
         if (alive) setNotFound(true);
       } finally {
@@ -74,9 +77,9 @@ export default function PostDetailPage() {
         setJoined(false);
         setPost({ ...post, current_participants: Math.max(0, post.current_participants - 1) });
       } else {
-        await postService.joinPost(post.post_id);
-        setJoined(true);
-        setPost({ ...post, current_participants: post.current_participants + 1 });
+        const res = await postService.joinPost(post.post_id);
+        setJoined(res.join_status);
+        setPost({ ...post, current_participants: res.current_participants, status: res.status });
       }
     } catch (err) {
       const action = joined ? "참여 취소" : "참여 신청";
