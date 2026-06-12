@@ -1,4 +1,4 @@
-import { Notification } from "@/types/notification";
+import { Notification, NotificationPageResponse, NotificationReadAllResponse } from "@/types/notification";
 
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(path, options);
@@ -8,19 +8,18 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const notificationService = {
-  getNotifications: (params?: { is_read?: boolean }) => {
-    const query =
-      params?.is_read !== undefined ? `?is_read=${params.is_read}` : "";
-    return fetchApi<Notification[]>(`/api/notifications${query}`);
+  getNotifications: (params?: { page?: number; size?: number }) => {
+    const query = params ? `?${new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString()}` : "";
+    return fetchApi<NotificationPageResponse>(`/api/notifications${query}`);
   },
 
   markRead: (id: string) =>
-    fetchApi<{ message: string }>(`/api/notifications/${id}/read`, {
+    fetchApi<Notification>(`/api/notifications/${id}/read`, {
       method: "PATCH",
     }),
 
   markAllRead: () =>
-    fetchApi<{ message: string }>(`/api/notifications/read-all`, {
+    fetchApi<NotificationReadAllResponse>(`/api/notifications/read-all`, {
       method: "PATCH",
     }),
 };

@@ -1,4 +1,4 @@
-import { Post, CreatePostPayload, CreatePostResponse, HistoryResponse } from "@/types/post";
+import { Post, CreatePostPayload, CreatePostResponse, JoinPostResponse, HistoryResponse } from "@/types/post";
 
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(path, options);
@@ -42,7 +42,7 @@ export const postService = {
     fetchApi<{ message: string }>(`/posts/${id}`, { method: "DELETE" }),
 
   joinPost: (id: string) =>
-    fetchApi<{ message: string }>(`/posts/${id}/join`, { method: "POST" }),
+    fetchApi<JoinPostResponse>(`/posts/${id}/join`, { method: "POST" }),
 
   leavePost: (id: string) =>
     fetchApi<{ message: string }>(`/posts/${id}/leave`, { method: "DELETE" }),
