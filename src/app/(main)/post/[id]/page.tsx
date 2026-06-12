@@ -61,7 +61,7 @@ export default function PostDetailPage() {
     };
   }, [id]);
 
-  const isHost = !!post && !!user && post.host_id === user.id;
+  const isHost = !!post && !!user && post.host_id === (user.user_id ?? user.id);
   const isFull =
     !!post && post.current_participants >= post.max_participants && !joined;
 
@@ -70,11 +70,11 @@ export default function PostDetailPage() {
     setActing(true);
     try {
       if (joined) {
-        await postService.leavePost(post.id);
+        await postService.leavePost(post.post_id);
         setJoined(false);
         setPost({ ...post, current_participants: Math.max(0, post.current_participants - 1) });
       } else {
-        await postService.joinPost(post.id);
+        await postService.joinPost(post.post_id);
         setJoined(true);
         setPost({ ...post, current_participants: post.current_participants + 1 });
       }
@@ -89,11 +89,11 @@ export default function PostDetailPage() {
 
   const handleShare = () => {
     if (typeof navigator !== "undefined" && navigator.share) {
-      navigator.share({ title: post?.menu ?? "밥친구 모집", url: window.location.href }).catch(() => {});
+      navigator.share({ title: post?.title ?? "밥친구 모집", url: window.location.href }).catch(() => {});
     }
   };
 
-  const tags = post?.food_categories?.length ? post.food_categories : post ? [post.category] : [];
+  const tags = post?.food_categories?.length ? post.food_categories : [];
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -154,7 +154,7 @@ export default function PostDetailPage() {
                 )}
               </div>
               <h2 className="text-[24px] font-bold text-grey-900 leading-8 tracking-[-0.5px] mb-4">
-                {post.menu}
+                {post.title}
               </h2>
               {/* seat indicator */}
               <div className="flex items-center gap-1.5">

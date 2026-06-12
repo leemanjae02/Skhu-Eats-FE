@@ -49,8 +49,8 @@ function CreatePostForm() {
     (async () => {
       try {
         const p = await postService.getPost(editId);
-        setTitle(p.menu);
-        setCategories(p.food_categories?.length ? p.food_categories : [p.category]);
+        setTitle(p.title);
+        setCategories(p.food_categories.length ? p.food_categories : []);
         const d = new Date(p.meeting_time);
         const pad = (n: number) => String(n).padStart(2, "0");
         setDate(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`);

@@ -83,9 +83,9 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {user?.category && user.category.length > 0 && (
+          {user?.food_categories && user.food_categories.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
-              {user.category.map((cat) => (
+              {user.food_categories.map((cat) => (
                 <Badge key={cat} variant="food" className="h-7 px-3 text-[13px]">
                   {cat}
                 </Badge>
@@ -140,12 +140,12 @@ export default function ProfilePage() {
              </div>
            ) : (
              history.map((item) => (
-               <div key={item.id} className="flex items-center justify-between px-5 py-3.5 border-t border-grey-100">
+               <div key={item.participation_id} className="flex items-center justify-between px-5 py-3.5 border-t border-grey-100">
                   <span className="text-[13px] font-medium text-grey-500 w-12">
                     {formatMonthDay(item.meeting_time)}
                   </span>
                   <div className="flex-1 px-2">
-                    <div className="text-[15px] font-semibold text-grey-800">{item.menu}</div>
+                    <div className="text-[15px] font-semibold text-grey-800">{item.title}</div>
                     <div className="text-[13px] text-grey-500">{item.location}</div>
                   </div>
                   <Badge variant={item.status === "completed" ? "closed" : "active"}>

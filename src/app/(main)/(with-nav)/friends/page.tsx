@@ -45,13 +45,14 @@ export default function FriendsPage() {
 
   const handleEdit = (id: string) => router.push(`/create?edit=${id}`);
 
+
   const handleDelete = async (id: string) => {
     if (busyId) return;
     if (!window.confirm("이 모집글을 삭제할까요?")) return;
     setBusyId(id);
     try {
       await postService.deletePost(id);
-      setPosts((prev) => prev.filter((p) => p.id !== id));
+      setPosts((prev) => prev.filter((p) => p.post_id !== id));
     } catch (err) {
       const reason = err instanceof Error && err.message ? ` ${err.message}` : "";
       toast.error(`삭제에 실패했어요.${reason}`);
@@ -66,7 +67,7 @@ export default function FriendsPage() {
     setBusyId(id);
     try {
       await postService.leavePost(id);
-      setPosts((prev) => prev.filter((p) => p.id !== id));
+      setPosts((prev) => prev.filter((p) => p.post_id !== id));
     } catch (err) {
       const reason = err instanceof Error && err.message ? ` ${err.message}` : "";
       toast.error(`참여 취소에 실패했어요.${reason}`);
@@ -130,11 +131,11 @@ export default function FriendsPage() {
             const isClosed = post.status === "closed";
             return (
               <div
-                key={post.id}
+                key={post.post_id}
                 className="bg-white border border-grey-200 rounded-2xl p-4 flex gap-3.5"
               >
                 <button
-                  onClick={() => router.push(`/post/${post.id}`)}
+                  onClick={() => router.push(`/post/${post.post_id}`)}
                   className={
                     isClosed
                       ? "flex flex-col items-center w-10 bg-grey-100 rounded-xl py-1.5 shrink-0"
@@ -163,11 +164,11 @@ export default function FriendsPage() {
 
                 <div className="flex-1 min-w-0">
                   <button
-                    onClick={() => router.push(`/post/${post.id}`)}
+                    onClick={() => router.push(`/post/${post.post_id}`)}
                     className="block w-full text-left"
                   >
                     <h3 className="text-[17px] font-bold text-grey-900 truncate mb-1">
-                      {post.menu}
+                      {post.title}
                     </h3>
                     <p className="text-[13px] font-medium text-grey-600 mb-2.5">
                       {post.location} · {t.time}
@@ -181,14 +182,14 @@ export default function FriendsPage() {
                     {tab === "created" ? (
                       <>
                         <button
-                          onClick={() => handleEdit(post.id)}
+                          onClick={() => handleEdit(post.post_id)}
                           className="h-[30px] px-3.5 rounded-full bg-grey-100 text-[13px] font-bold text-grey-700"
                         >
                           수정
                         </button>
                         <button
-                          onClick={() => handleDelete(post.id)}
-                          disabled={busyId === post.id}
+                          onClick={() => handleDelete(post.post_id)}
+                          disabled={busyId === post.post_id}
                           className="h-[30px] px-3.5 rounded-full bg-red-50 text-[13px] font-bold text-red-500 disabled:opacity-50"
                         >
                           삭제
@@ -196,8 +197,8 @@ export default function FriendsPage() {
                       </>
                     ) : (
                       <button
-                        onClick={() => handleLeave(post.id)}
-                        disabled={busyId === post.id}
+                        onClick={() => handleLeave(post.post_id)}
+                        disabled={busyId === post.post_id}
                         className="h-[30px] px-3.5 rounded-full bg-red-50 text-[13px] font-bold text-red-500 disabled:opacity-50"
                       >
                         참여 취소

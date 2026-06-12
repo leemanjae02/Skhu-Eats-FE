@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CardProps {
-  thumbnail: string;
+  thumbnail?: string;
   category: string;
   status: "urgent" | "active" | "closed";
   time: string;
@@ -17,7 +17,7 @@ interface CardProps {
 }
 
 export function Card({
-  thumbnail,
+  thumbnail = "",
   category,
   status,
   time,

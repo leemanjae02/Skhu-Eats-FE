@@ -24,9 +24,7 @@ export default function HomePage() {
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
-        const data = await postService.getPosts(
-          activeFilter !== "전체" ? { category: activeFilter } : undefined,
-        );
+        const data = await postService.getPosts();
         setPosts(data);
       } catch (err) {
         console.error("Failed to fetch posts:", err);
@@ -36,7 +34,12 @@ export default function HomePage() {
     };
 
     fetchPosts();
-  }, [activeFilter]);
+  }, []);
+
+  const filteredPosts = useMemo(() => {
+    if (activeFilter === "전체") return posts;
+    return posts.filter((p) => p.food_categories.includes(activeFilter));
+  }, [posts, activeFilter]);
 
   const stats = useMemo(() => {
     return {
@@ -108,15 +111,15 @@ export default function HomePage() {
             <div className="py-20 text-center text-grey-400 text-sm font-medium">
               밥친구를 찾고 있어요...
             </div>
-          ) : posts.length > 0 ? (
-            posts.map((post) => (
-              <div key={post.id} onClick={() => router.push(`/post/${post.id}`)}>
+          ) : filteredPosts.length > 0 ? (
+            filteredPosts.map((post) => (
+              <div key={post.post_id} onClick={() => router.push(`/post/${post.post_id}`)}>
                 <Card
-                  thumbnail={post.thumbnail}
-                  category={post.category}
+                  thumbnail=""
+                  category={post.food_categories[0] ?? ""}
                   status={post.status}
                   time={formatTime(post.meeting_time)}
-                  title={post.menu}
+                  title={post.title}
                   location={post.location}
                   currentParticipants={post.current_participants}
                   maxParticipants={post.max_participants}

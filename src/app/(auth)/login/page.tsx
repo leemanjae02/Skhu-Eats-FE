@@ -38,8 +38,14 @@ export default function LoginPage() {
       const fullEmail = emailId.includes("@")
         ? emailId
         : `${emailId}@office.skhu.ac.kr`;
-      const { user } = await authService.login(fullEmail, password);
-      setAuth(user);
+      const res = await authService.login(fullEmail, password);
+      setAuth({
+        id: res.user_id,
+        user_id: res.user_id,
+        email: fullEmail,
+        nickname: res.nickname,
+        avatar: null,
+      });
       router.replace("/");
     } catch (err) {
       setError("root", {
