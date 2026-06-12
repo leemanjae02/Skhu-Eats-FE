@@ -8,7 +8,7 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const postService = {
-  getPosts: (params?: { category?: string; status?: string }) => {
+  getPosts: (params?: { time_slot?: string; status?: string }) => {
     const query = params ? `?${new URLSearchParams(params).toString()}` : "";
     return fetchApi<Post[]>(`/posts${query}`);
   },
@@ -18,7 +18,7 @@ export const postService = {
 
   // 내 모임 목록 — created(내가 만든) / joined(참여 중)
   getMyPosts: (type: "created" | "joined" = "created") =>
-    fetchApi<Post[]>(`/users/me/posts${type === "joined" ? "?type=joined" : ""}`),
+    fetchApi<Post[]>(type === "joined" ? "/users/me/posts" : "/posts/myposts"),
 
   // 내 참여 이력 (페이지네이션)
   getHistory: (page = 1, limit = 20) =>
@@ -33,7 +33,7 @@ export const postService = {
 
   updatePost: (id: string, data: Partial<CreatePostPayload>) =>
     fetchApi<Post>(`/posts/${id}`, {
-      method: "PUT",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }),

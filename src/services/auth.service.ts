@@ -1,4 +1,4 @@
-import { RegisterPayload, AuthResponse, User, UpdateProfilePayload } from "@/types/auth";
+import { RegisterPayload, LoginResponse, RegisterResponse, User, UpdateProfilePayload } from "@/types/auth";
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(path, {
@@ -26,9 +26,9 @@ async function del(path: string): Promise<void> {
   }
 }
 
-async function put<T>(path: string, body: unknown): Promise<T> {
+async function patch<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(path, {
-    method: "PUT",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
@@ -39,7 +39,7 @@ async function put<T>(path: string, body: unknown): Promise<T> {
 
 export const authService = {
   login: (email: string, password: string) =>
-    post<Omit<AuthResponse, "access_token" | "refresh_token">>("/auth/login", { email, password }),
+    post<LoginResponse>("/auth/login", { email, password }),
 
   sendCode: (email: string) =>
     post<{ message: string }>("/auth/send-code", { email }),
@@ -52,16 +52,16 @@ export const authService = {
     get<{ available: boolean }>(`/auth/check-nickname?nickname=${encodeURIComponent(nickname)}`),
 
   register: (data: RegisterPayload) =>
-    post<Omit<AuthResponse, "access_token" | "refresh_token">>("/auth/register", data),
+    post<RegisterResponse>("/auth/register", data),
 
   refresh: () =>
-    post<{ message: string }>("/auth/refresh", {}),
+    post<LoginResponse>("/auth/refresh", {}),
 
   getMe: () =>
     get<User>("/users/me"),
 
   updateProfile: (data: UpdateProfilePayload) =>
-    put<User>("/users", data),
+    patch<User>("/users/me", data),
 
   withdraw: () =>
     del("/users/me"),
