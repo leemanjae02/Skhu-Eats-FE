@@ -15,7 +15,7 @@ interface VerifyCodeBody { email: string; code: string }
 interface RegisterBody {
   email: string; password: string; nickname: string;
   department: string; admission_year: string;
-  bio?: string; category?: string[];
+  bio?: string; food_categories?: string[];
 }
 interface RefreshBody { refresh_token: string }
 
@@ -31,9 +31,12 @@ export const memberHandlers = [
       if (user) {
         const tokens = makeTokens(user.email);
         return HttpResponse.json({
-          message: "Login successful",
-          user: sanitizeUser(user),
-          ...tokens,
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+          token_type: "bearer",
+          expires_in: 3600,
+          nickname: user.nickname,
+          user_id: user.id,
         });
       }
       return new HttpResponse(
@@ -97,12 +100,20 @@ export const memberHandlers = [
       admission_year: body.admission_year,
       avatar: null,
       bio: body.bio,
-      category: body.category,
+      food_categories: body.food_categories,
     };
     members.push(newUser);
-    const { access_token } = makeTokens(newUser.email);
     return HttpResponse.json(
-      { message: "회원가입이 완료됐어요", user: sanitizeUser(newUser), access_token },
+      {
+        message: "회원가입이 완료됐어요",
+        user_id: newUser.id,
+        email: newUser.email,
+        nickname: newUser.nickname,
+        department: newUser.department,
+        admission_year: newUser.admission_year,
+        bio: newUser.bio,
+        email_verified: true,
+      },
       { status: 201 },
     );
   }),
@@ -118,7 +129,14 @@ export const memberHandlers = [
     activeSessions.delete(body.refresh_token);
     const newAccess = `mock-access-${Math.random().toString(36).slice(2, 11)}`;
     activeSessions.set(newAccess, { email: session.email, type: "access" });
-    return HttpResponse.json({ access_token: newAccess });
+    const user = members.find((m) => m.email === session.email);
+    return HttpResponse.json({
+      access_token: newAccess,
+      token_type: "bearer",
+      expires_in: 3600,
+      nickname: user?.nickname ?? "",
+      user_id: user?.id ?? "",
+    });
   }),
 
   // Auth: Logout
@@ -142,8 +160,8 @@ export const memberHandlers = [
     return HttpResponse.json(sanitizeUser(user));
   }),
 
-  // Member: 프로필 수정 — PUT /users (명세: 닉네임만 수정)
-  http.put(/\/users(\?.*)?$/, async ({ request }) => {
+  // Member: 프로필 수정 — PATCH /users/me (명세: 닉네임만 수정)
+  http.patch(/\/users\/me(\?.*)?$/, async ({ request }) => {
     const user = userFromAuthHeader(request.headers.get("Authorization"));
     if (!user) {
       return HttpResponse.json(
@@ -174,7 +192,7 @@ export const memberHandlers = [
     return HttpResponse.json(sanitizeUser(user));
   }),
 
-  // Member: 회원 탈퇴 — DELETE /users/me (Hard Delete + 토큰 폐기, 204)
+  // Member: 회원 탈퇴 — DELETE /users/me (Hard Delete + 토큰 폐기, 200)
   http.delete(/\/users\/me$/, ({ request }) => {
     const user = userFromAuthHeader(request.headers.get("Authorization"));
     if (!user) return new HttpResponse(null, { status: 401 });
@@ -189,6 +207,6 @@ export const memberHandlers = [
       if (session.email === user.email) activeSessions.delete(token);
     }
 
-    return new HttpResponse(null, { status: 204 });
+    return HttpResponse.json({ message: "회원 탈퇴가 완료됐어요" });
   }),
 ];

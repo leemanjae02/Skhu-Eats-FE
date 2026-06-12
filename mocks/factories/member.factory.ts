@@ -35,7 +35,7 @@ export interface MemberData {
   admission_year: string;
   avatar: string | null;
   bio: string;
-  category: string[];
+  food_categories: string[];
 }
 
 let _id = 100;
@@ -53,7 +53,7 @@ export function createMember(overrides?: Partial<MemberData>): MemberData {
     admission_year: String(year),
     avatar: faker.helpers.arrayElement(AVATARS),
     bio: faker.helpers.arrayElement(BIOS),
-    category: faker.helpers.arrayElements(FOOD_CATEGORIES, { min: 1, max: 3 }),
+    food_categories: faker.helpers.arrayElements(FOOD_CATEGORIES, { min: 1, max: 3 }),
     ...overrides,
   };
 }

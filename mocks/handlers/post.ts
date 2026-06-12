@@ -22,9 +22,9 @@ const joinedSet = (userId: string) => {
 
 // 참여 이력 (userId → 참여 기록 목록)
 interface HistoryRecord {
-  id: string;
+  participation_id: string;
   post_id: string;
-  menu: string;
+  title: string;
   location: string;
   meeting_time: string;
   status: "completed" | "upcoming";
@@ -33,33 +33,22 @@ const historyByUser = new Map<string, HistoryRecord[]>();
 const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString();
 // 데모: 첫 번째 회원(밥순이)의 지난 참여 이력 시드
 historyByUser.set("1", [
-  { id: "h1", post_id: "201", menu: "김치찌개 + 공기밥", location: "학생회관 1층", meeting_time: daysAgo(3), status: "completed" },
-  { id: "h2", post_id: "202", menu: "떡볶이 세트", location: "정문 분식집", meeting_time: daysAgo(8), status: "completed" },
-  { id: "h3", post_id: "203", menu: "스시로 런치세트", location: "정문 스시로", meeting_time: daysAgo(14), status: "completed" },
+  { participation_id: "h1", post_id: "201", title: "김치찌개 + 공기밥", location: "학생회관 1층", meeting_time: daysAgo(3), status: "completed" },
+  { participation_id: "h2", post_id: "202", title: "떡볶이 세트", location: "정문 분식집", meeting_time: daysAgo(8), status: "completed" },
+  { participation_id: "h3", post_id: "203", title: "스시로 런치세트", location: "정문 스시로", meeting_time: daysAgo(14), status: "completed" },
 ]);
 const pushHistory = (userId: string, post: PostData) => {
   const list = historyByUser.get(userId) ?? [];
-  if (list.some((h) => h.post_id === post.id)) return;
+  if (list.some((h) => h.post_id === post.post_id)) return;
   list.unshift({
-    id: `h-${post.id}`,
-    post_id: post.id,
-    menu: post.menu,
+    participation_id: `h-${post.post_id}`,
+    post_id: post.post_id,
+    title: post.title,
     location: post.location,
     meeting_time: post.meeting_time,
     status: new Date(post.meeting_time).getTime() < Date.now() ? "completed" : "upcoming",
   });
   historyByUser.set(userId, list);
-};
-
-const CATEGORY_THUMBNAILS: Record<string, string> = {
-  한식: "🍲",
-  면류: "🍜",
-  일식: "🍣",
-  중식: "🥟",
-  양식: "🍕",
-  분식: "🌯",
-  샐러드: "🥗",
-  카페: "☕",
 };
 
 // POST /posts 요청 본문 (API 명세 기준)
@@ -87,14 +76,12 @@ export const postHandlers = [
   // Posts: List — GET /posts (호스트 직후 /posts 만 매칭, /users/me/posts 제외)
   http.get(/\/\/[^/]+\/posts(\?.*)?$/, ({ request }) => {
     const url = new URL(request.url);
-    const category = url.searchParams.get("category");
+    const timeSlot = url.searchParams.get("time_slot");
     const status = url.searchParams.get("status");
 
     let filtered = [...posts];
-    if (category && category !== "전체") {
-      filtered = filtered.filter(
-        (p) => p.category === category || p.food_categories?.includes(category),
-      );
+    if (timeSlot) {
+      // time_slot 필터: 추후 서버 스펙 확정 시 구현. 현재는 무시.
     }
     if (status) {
       filtered = filtered.filter((p) => p.status === status);
@@ -113,7 +100,7 @@ export const postHandlers = [
   // Posts: Join — POST /posts/:id/join
   http.post(/\/posts\/[^/?]+\/join(\?.*)?$/, ({ request }) => {
     const id = postIdFromUrl(request.url);
-    const post = posts.find((p) => p.id === id);
+    const post = posts.find((p) => p.post_id === id);
     if (!post) return new HttpResponse(null, { status: 404 });
     if (post.current_participants >= post.max_participants) {
       return HttpResponse.json({ message: "이미 마감된 모임이에요" }, { status: 400 });
@@ -133,7 +120,7 @@ export const postHandlers = [
   // Posts: Leave — DELETE /posts/:id/leave
   http.delete(/\/posts\/[^/?]+\/leave(\?.*)?$/, ({ request }) => {
     const id = postIdFromUrl(request.url);
-    const post = posts.find((p) => p.id === id);
+    const post = posts.find((p) => p.post_id === id);
     if (!post) return new HttpResponse(null, { status: 404 });
     if (post.current_participants > 0) {
       post.current_participants -= 1;
@@ -146,16 +133,19 @@ export const postHandlers = [
     return HttpResponse.json({ message: "참여 취소가 완료됐어요" });
   }),
 
-  // Users: 내 모임 목록 — GET /users/me/posts (?type=joined → 참여 중)
+  // Posts: My created posts — GET /posts/myposts
+  http.get(/\/posts\/myposts(\?.*)?$/, ({ request }) => {
+    const user = userFromAuthHeader(request.headers.get("Authorization"));
+    if (!user) return new HttpResponse(null, { status: 401 });
+    return HttpResponse.json(posts.filter((p) => p.host_id === user.id));
+  }),
+
+  // Users: 내 참여 중인 모임 목록 — GET /users/me/posts
   http.get(/\/users\/me\/posts(\?.*)?$/, ({ request }) => {
     const user = userFromAuthHeader(request.headers.get("Authorization"));
     if (!user) return new HttpResponse(null, { status: 401 });
-    const type = new URL(request.url).searchParams.get("type");
-    if (type === "joined") {
-      const set = joinedSet(user.id);
-      return HttpResponse.json(posts.filter((p) => set.has(p.id)));
-    }
-    return HttpResponse.json(posts.filter((p) => p.host_id === user.id));
+    const set = joinedSet(user.id);
+    return HttpResponse.json(posts.filter((p) => set.has(p.post_id)));
   }),
 
   // Users: 내 참여 이력 — GET /users/me/history (?page=&limit=)
@@ -178,7 +168,7 @@ export const postHandlers = [
   // Posts: Detail — GET /posts/:id
   http.get(/\/posts\/[^/?]+(\?.*)?$/, ({ request }) => {
     const id = postIdFromUrl(request.url);
-    const post = posts.find((p) => p.id === id);
+    const post = posts.find((p) => p.post_id === id);
     if (!post) return new HttpResponse(null, { status: 404 });
     return HttpResponse.json(post);
   }),
@@ -198,13 +188,10 @@ export const postHandlers = [
     }
 
     const food = body.food_categories ?? [];
-    const primary = food[0] ?? "한식";
     const host = userFromAuthHeader(request.headers.get("Authorization"));
     const newPost = createPost({
-      menu: body.title,
-      category: primary,
+      title: body.title,
       food_categories: food,
-      thumbnail: CATEGORY_THUMBNAILS[primary] ?? "🍽️",
       location: body.location,
       meeting_time: body.meeting_time,
       max_participants: body.max_participants,
@@ -218,27 +205,26 @@ export const postHandlers = [
     dailyCreatedCount += 1;
 
     // 명세 성공 응답: { post_id }
-    return HttpResponse.json({ post_id: newPost.id }, { status: 201 });
+    return HttpResponse.json({ post_id: newPost.post_id }, { status: 201 });
   }),
 
-  // Posts: Update — PUT /posts/:id
-  http.put(/\/posts\/[^/?]+(\?.*)?$/, async ({ request }) => {
+  // Posts: Update — PATCH /posts/:id
+  http.patch(/\/posts\/[^/?]+(\?.*)?$/, async ({ request }) => {
     const id = postIdFromUrl(request.url);
-    const post = posts.find((p) => p.id === id);
+    const post = posts.find((p) => p.post_id === id);
     if (!post) return new HttpResponse(null, { status: 404 });
 
     const body = (await request.json()) as Partial<CreatePostBody>;
-    if (body.title !== undefined) post.menu = body.title;
+    if (body.title !== undefined) post.title = body.title;
     if (body.food_categories !== undefined) {
       post.food_categories = body.food_categories;
-      post.category = body.food_categories[0] ?? post.category;
-      post.thumbnail = CATEGORY_THUMBNAILS[post.category] ?? post.thumbnail;
     }
     if (body.location !== undefined) post.location = body.location;
     if (body.meeting_time !== undefined) post.meeting_time = body.meeting_time;
     if (body.max_participants !== undefined) post.max_participants = body.max_participants;
     if (body.memo !== undefined) post.memo = body.memo;
     if (body.kakao_link !== undefined) post.kakao_link = body.kakao_link;
+    post.updated_at = new Date().toISOString();
 
     return HttpResponse.json(post);
   }),
@@ -246,7 +232,7 @@ export const postHandlers = [
   // Posts: Delete — DELETE /posts/:id
   http.delete(/\/posts\/[^/?]+(\?.*)?$/, ({ request }) => {
     const id = postIdFromUrl(request.url);
-    const idx = posts.findIndex((p) => p.id === id);
+    const idx = posts.findIndex((p) => p.post_id === id);
     if (idx === -1) return new HttpResponse(null, { status: 404 });
     posts.splice(idx, 1);
     return HttpResponse.json({ message: "모집글이 삭제됐어요" });

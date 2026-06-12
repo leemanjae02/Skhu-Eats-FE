@@ -20,21 +20,25 @@ const MEMOS = [
 ];
 
 export interface PostData {
-  id: string;
+  post_id: string;
   host_id: string;
   host_nickname: string;
-  menu: string;
-  category: string;
-  food_categories?: string[];
-  thumbnail: string;
-  meeting_time: string;
+  host_department?: string;
+  host_admission_year?: string;
+  host_manner_score?: number;
+  title: string;
+  food_categories: string[];
   location: string;
-  memo?: string;
+  meeting_time: string;
+  deadline?: string;
   max_participants: number;
   current_participants: number;
-  status: "active" | "urgent" | "closed";
-  created_at: string;
+  memo?: string;
   kakao_link?: string;
+  status: "active" | "urgent" | "closed";
+  status_label?: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 let _id = 100;
@@ -51,18 +55,17 @@ export function createPost(overrides?: Partial<PostData>): PostData {
   const status: PostData["status"] = isClosed ? "closed" : isUrgent ? "urgent" : "active";
 
   return {
-    id: String(++_id),
+    post_id: String(++_id),
     host_id: String(faker.number.int({ min: 1, max: 10 })),
     host_nickname: faker.person.firstName(),
-    thumbnail: group.thumbnail,
-    category: group.category,
     food_categories: [group.category],
-    menu: faker.helpers.arrayElement(group.menus),
+    title: faker.helpers.arrayElement(group.menus),
     location: faker.helpers.arrayElement(LOCATIONS),
     meeting_time: meetingTime.toISOString(),
     max_participants: maxParticipants,
     current_participants: currentParticipants,
     status,
+    status_label: status === "urgent" ? "마감임박" : status === "closed" ? "마감" : "모집중",
     created_at: createdAt.toISOString(),
     memo: faker.datatype.boolean(0.5)
       ? faker.helpers.arrayElement(MEMOS)

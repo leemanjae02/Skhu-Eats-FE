@@ -8,6 +8,6 @@
     "admission_year": "2021",
     "avatar": "🍚",
     "bio": "빠르게 먹고 싶을 때 같이 먹어요! 대화도 좋아해요 😊",
-    "category": ["면류", "한식"]
+    "food_categories": ["면류", "한식"]
   }
 ]
