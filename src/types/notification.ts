@@ -1,11 +1,27 @@
-export type NotificationType = 'new_join' | 'left' | 'full' | 'cancelled' | 'reminder';
+export type NotificationType = "new_join" | "left" | "full" | "cancelled" | "reminder";
 
 export interface Notification {
-  id: string;
-  post_id: string | null;
+  notification_id: string;
   type: NotificationType;
+  title: string;
   message: string;
-  sub_message: string | null;
-  is_read: boolean;
+  target_type?: string;
+  target_id?: string;
+  read: boolean;
   created_at: string;
+  read_at?: string;
+}
+
+export interface NotificationPageResponse {
+  notifications: Notification[];
+  page: number;
+  size: number;
+  total_elements: number;
+  total_pages: number;
+  last: boolean;
+}
+
+export interface NotificationReadAllResponse {
+  message: string;
+  updated_count: number;
 }

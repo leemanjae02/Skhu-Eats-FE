@@ -18,6 +18,10 @@ export interface Post {
   kakao_link?: string;
   status: PostStatus;
   status_label?: string;
+  /** GET /posts/{postId} 상세 응답 전용 — 내 참여 여부 */
+  join_status?: boolean;
+  join_button_label?: string;
+  can_join?: boolean;
   created_at: string;
   updated_at?: string;
 }
@@ -40,6 +44,18 @@ export interface CreatePostResponse {
   post_id: string;
 }
 
+/** POST /posts/{postId}/join 응답 */
+export interface JoinPostResponse {
+  post_id: string;
+  current_participants: number;
+  max_participants: number;
+  status: PostStatus;
+  status_label?: string;
+  join_status: boolean;
+  join_button_label?: string;
+  can_join: boolean;
+}
+
 /** GET /users/me/history 항목 (참여 이력) */
 export interface Participation {
   participation_id: string;
@@ -52,8 +68,8 @@ export interface Participation {
 
 /** GET /users/me/history 응답 (페이지네이션) */
 export interface HistoryResponse {
-  items: Participation[];
+  data: Participation[];
   page: number;
   limit: number;
-  total: number;
+  total_count: number;
 }
