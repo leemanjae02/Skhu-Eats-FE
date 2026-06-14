@@ -10,12 +10,10 @@ import { Post, Participation } from "@/types/post";
 
 type TabKey = "created" | "joined";
 
-const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-
 const fmt = (iso: string) => {
   const d = new Date(iso);
   return {
-    month: MONTHS[d.getMonth()],
+    month: String(d.getMonth() + 1),
     day: String(d.getDate()),
     time: d.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false }),
   };
@@ -144,7 +142,8 @@ export default function FriendsPage() {
         ) : tab === "created" ? (
           createdPosts.map((post) => {
             const t = fmt(post.meeting_time);
-            const isClosed = post.status === "closed";
+            const isClosed = post.status === "CLOSED";
+            const isUrgent = !isClosed && post.current_participants >= post.max_participants - 1;
             return (
               <PostCard
                 key={post.post_id}
@@ -157,8 +156,8 @@ export default function FriendsPage() {
                 currentParticipants={post.current_participants}
                 maxParticipants={post.max_participants}
                 isClosed={isClosed}
-                statusLabel={post.status === "urgent" ? "마감임박" : isClosed ? "마감" : "모집중"}
-                statusVariant={post.status === "urgent" ? "urgent" : isClosed ? "closed" : "active"}
+                statusLabel={isClosed ? "마감" : isUrgent ? "마감임박" : "모집중"}
+                statusVariant={isClosed ? "closed" : isUrgent ? "urgent" : "active"}
                 onNavigate={() => router.push(`/post/${post.post_id}`)}
                 actions={
                   <>
@@ -233,30 +232,29 @@ function PostCard({
   actions: React.ReactNode;
 }) {
   return (
-    <div className="bg-white border border-grey-200 rounded-2xl p-4 flex gap-3.5">
+    <div className="bg-white border border-grey-200 rounded-2xl p-3 flex gap-3">
       <button
         onClick={onNavigate}
         className={
           isClosed
-            ? "flex flex-col items-center w-10 bg-grey-100 rounded-xl py-1.5 shrink-0"
-            : "flex flex-col items-center w-10 bg-primary-100 rounded-xl py-1.5 shrink-0"
+            ? "flex flex-col items-center justify-center w-9 bg-grey-100 rounded-xl py-2 shrink-0"
+            : "flex flex-col items-center justify-center w-9 bg-primary-100 rounded-xl py-2 shrink-0"
         }
       >
-        <span className={isClosed ? "text-[10px] font-bold text-grey-500 tracking-wider" : "text-[10px] font-bold text-primary-700 tracking-wider"}>
-          {month}
+        <span className={isClosed ? "text-[10px] font-bold text-grey-500" : "text-[10px] font-bold text-primary-700"}>
+          {month}월
         </span>
-        <span className={isClosed ? "text-[22px] font-bold text-grey-500 leading-none" : "text-[22px] font-bold text-primary-700 leading-none"}>
+        <span className={isClosed ? "text-[18px] font-bold text-grey-500 leading-none" : "text-[18px] font-bold text-primary-700 leading-none"}>
           {day}
         </span>
       </button>
 
       <div className="flex-1 min-w-0">
         <button onClick={onNavigate} className="block w-full text-left">
-          <h3 className="text-[17px] font-bold text-grey-900 truncate mb-1">{title}</h3>
-          <p className="text-[13px] font-medium text-grey-600 mb-2.5">{location} · {time}</p>
-          <div className="text-[13px] font-medium text-grey-500 mb-2.5">
-            {currentParticipants}/{maxParticipants}명 참여
-          </div>
+          <h3 className="text-[15px] font-bold text-grey-900 truncate mb-0.5">{title}</h3>
+          <p className="text-[12px] font-medium text-grey-600 mb-1.5">
+            {location} · {time} · {currentParticipants}/{maxParticipants}명
+          </p>
         </button>
         <div className="flex gap-2">{actions}</div>
       </div>
