@@ -49,10 +49,17 @@ export default function HomePage() {
 
   const filteredPosts = posts;
 
+  const toDisplayStatus = (p: { status: string; current_participants: number; max_participants: number }): "active" | "urgent" | "closed" => {
+    if (p.status === "CLOSED") return "closed";
+    if (p.current_participants >= p.max_participants - 1) return "urgent";
+    return "active";
+  };
+
   const stats = useMemo(() => {
+    const open = posts.filter((p) => p.status === "OPEN");
     return {
-      active: posts.filter((p) => p.status === "active").length,
-      urgent: posts.filter((p) => p.status === "urgent").length,
+      active: open.length,
+      urgent: open.filter((p) => p.current_participants >= p.max_participants - 1).length,
     };
   }, [posts]);
 
@@ -125,7 +132,7 @@ export default function HomePage() {
                 <Card
                   thumbnail=""
                   category={post.food_categories[0] ?? ""}
-                  status={post.status}
+                  status={toDisplayStatus(post)}
                   time={formatTime(post.meeting_time)}
                   title={post.title}
                   location={post.location}

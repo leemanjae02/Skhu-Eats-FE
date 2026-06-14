@@ -1,4 +1,4 @@
-export type PostStatus = "active" | "urgent" | "closed";
+export type PostStatus = "OPEN" | "CLOSED";
 
 export interface Post {
   post_id: string;

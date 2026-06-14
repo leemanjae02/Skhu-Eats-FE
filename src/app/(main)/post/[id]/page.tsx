@@ -147,12 +147,12 @@ export default function PostDetailPage() {
                     #{t}
                   </span>
                 ))}
-                {post.status === "urgent" && (
+                {post.status === "OPEN" && post.current_participants >= post.max_participants - 1 && (
                   <span className="inline-flex items-center h-[22px] px-2 rounded-full text-[12px] font-semibold bg-red-50 text-red-500">
                     마감임박
                   </span>
                 )}
-                {post.status === "closed" && (
+                {post.status === "CLOSED" && (
                   <span className="inline-flex items-center h-[22px] px-2 rounded-full text-[12px] font-semibold bg-grey-100 text-grey-500">
                     마감
                   </span>
