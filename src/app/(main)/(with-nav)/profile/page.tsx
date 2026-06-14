@@ -94,7 +94,10 @@ export default function ProfilePage() {
         <div className="h-2 bg-grey-100" />
 
         <section className="bg-white">
-          <div className="flex items-center gap-3.5 px-5 py-4 cursor-pointer active:bg-grey-50 border-b border-grey-100">
+          <div
+            className="flex items-center gap-3.5 px-5 py-4 cursor-pointer active:bg-grey-50 border-b border-grey-100"
+            onClick={() => router.push("/friends?tab=joined")}
+          >
             <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
               <Utensils className="w-5 h-5 text-primary-700" />
             </div>
@@ -103,7 +106,10 @@ export default function ProfilePage() {
               {myPage?.total_join_count ?? 0}회 <ChevronRight className="w-4.5 h-4.5 text-grey-400" />
             </div>
           </div>
-          <div className="flex items-center gap-3.5 px-5 py-4 cursor-pointer active:bg-grey-50">
+          <div
+            className="flex items-center gap-3.5 px-5 py-4 cursor-pointer active:bg-grey-50"
+            onClick={() => router.push("/friends?tab=created")}
+          >
             <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
               <Crown className="w-5 h-5 text-orange-500" />
             </div>
