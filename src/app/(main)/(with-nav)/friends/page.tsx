@@ -29,6 +29,10 @@ export default function FriendsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!searchParams.get("tab")) router.replace("/friends?tab=created");
+  }, []);
+
   const load = async (key: TabKey) => {
     setIsLoading(true);
     try {
