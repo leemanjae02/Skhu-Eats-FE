@@ -1,25 +1,29 @@
-import { User } from "./auth";
-
 export type PostStatus = "active" | "urgent" | "closed";
 
 export interface Post {
-  id: string;
+  post_id: string;
   host_id: string;
   host_nickname: string;
-  menu: string;
-  category: string;
-  /** 명세 food_categories[] (다중 카테고리). category 는 대표값(첫 번째). */
-  food_categories?: string[];
-  thumbnail: string;
-  meeting_time: string;
+  host_department?: string;
+  host_admission_year?: string;
+  host_manner_score?: number;
+  title: string;
+  food_categories: string[];
   location: string;
-  memo?: string;
+  meeting_time: string;
+  deadline?: string;
   max_participants: number;
   current_participants: number;
-  status: PostStatus;
-  created_at: string;
+  memo?: string;
   kakao_link?: string;
-  participants?: User[];
+  status: PostStatus;
+  status_label?: string;
+  /** GET /posts/{postId} 상세 응답 전용 — 내 참여 여부 */
+  join_status?: boolean;
+  join_button_label?: string;
+  can_join?: boolean;
+  created_at: string;
+  updated_at?: string;
 }
 
 /** POST /posts — 모집글 작성 요청 본문 (API 명세 기준) */
@@ -40,20 +44,43 @@ export interface CreatePostResponse {
   post_id: string;
 }
 
+/** POST /posts/{postId}/join 응답 */
+export interface JoinPostResponse {
+  post_id: string;
+  current_participants: number;
+  max_participants: number;
+  status: PostStatus;
+  status_label?: string;
+  join_status: boolean;
+  join_button_label?: string;
+  can_join: boolean;
+}
+
 /** GET /users/me/history 항목 (참여 이력) */
 export interface Participation {
-  id: string;
+  participation_id: string;
+  participation_status: string;
   post_id: string;
-  menu: string;
+  host_id: string;
+  host_nickname: string;
+  title: string;
+  food_categories: string[];
   location: string;
   meeting_time: string;
-  status: "completed" | "upcoming";
+  deadline?: string;
+  max_participants: number;
+  current_participants: number;
+  post_status: string;
+  post_status_label?: string;
+  can_cancel: boolean;
+  joined_at: string;
+  updated_at?: string;
 }
 
 /** GET /users/me/history 응답 (페이지네이션) */
 export interface HistoryResponse {
-  items: Participation[];
+  data: Participation[];
   page: number;
   limit: number;
-  total: number;
+  total_count: number;
 }

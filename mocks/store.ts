@@ -18,17 +18,17 @@ export const activeSessions = new Map<
 >();
 
 export const sanitizeUser = (user: Member): User => {
-  // password 제외, 명세 GET /users/me: { userId, email, nickname } 포함 (풀 프로필 유지)
+  // password 제외, 명세 GET /users/me: { user_id, email, nickname } 포함 (풀 프로필 유지)
   return {
     id: user.id,
-    userId: user.id,
+    user_id: user.id,
     email: user.email,
     nickname: user.nickname,
     avatar: user.avatar,
     department: user.department,
     admission_year: user.admission_year,
     bio: user.bio,
-    category: user.category,
+    food_categories: user.food_categories,
   };
 };
 

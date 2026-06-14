@@ -38,8 +38,14 @@ export default function LoginPage() {
       const fullEmail = emailId.includes("@")
         ? emailId
         : `${emailId}@office.skhu.ac.kr`;
-      const { user } = await authService.login(fullEmail, password);
-      setAuth(user);
+      const res = await authService.login(fullEmail, password);
+      setAuth({
+        id: res.user_id,
+        user_id: res.user_id,
+        email: fullEmail,
+        nickname: res.nickname,
+        avatar: null,
+      });
       router.replace("/");
     } catch (err) {
       setError("root", {
@@ -99,10 +105,6 @@ export default function LoginPage() {
               <Input
                 {...register("emailId", {
                   required: "이메일을 입력해주세요",
-                  pattern: {
-                    value: /^[a-zA-Z0-9._-]+(@office\.skhu\.ac\.kr)?$/,
-                    message: "올바른 학번 또는 이메일을 입력해주세요",
-                  },
                 })}
                 className="pr-24"
                 placeholder="학번 또는 아이디"
@@ -126,10 +128,6 @@ export default function LoginPage() {
             <Input
               {...register("password", {
                 required: "비밀번호를 입력해주세요",
-                pattern: {
-                  value: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/,
-                  message: "영문, 숫자, 특수문자(@$!%*#?&)를 포함해 8자 이상 입력해주세요",
-                },
               })}
               type="password"
               placeholder="비밀번호 입력"
@@ -166,7 +164,7 @@ export default function LoginPage() {
             </Link>
             <span className="text-grey-300 text-[13px]">|</span>
             <Link
-              href="#"
+              href="/password-reset"
               className="text-[13px] font-medium text-grey-600 px-[10px] py-1"
             >
               비밀번호 재설정

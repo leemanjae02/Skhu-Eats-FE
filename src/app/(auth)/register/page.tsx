@@ -153,15 +153,24 @@ export default function RegisterPage() {
     setApiError("");
     const { emailId, password } = getStep1Values();
     try {
-      const { user } = await authService.register({
+      const res = await authService.register({
         email: `${emailId}@office.skhu.ac.kr`,
         password,
         nickname: data.nickname,
         department: data.department,
-        admission_year: data.admissionYear,
-        category: selectedCategories,
+        admission_year: parseInt(data.admissionYear, 10),
+        food_categories: selectedCategories,
       });
-      setAuth(user);
+      setAuth({
+        id: res.user_id,
+        user_id: res.user_id,
+        email: res.email,
+        nickname: res.nickname,
+        avatar: null,
+        department: res.department,
+        admission_year: res.admission_year,
+        bio: res.bio,
+      });
       router.replace("/");
     } catch {
       setApiError("회원가입에 실패했어요. 다시 시도해주세요.");

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: '나랑 밥 먹을래? | 성공회대 밥친구',
+  title: '밥친구',
   description: '성공회대학교 학생 전용 밥 친구 매칭 서비스',
 };
 

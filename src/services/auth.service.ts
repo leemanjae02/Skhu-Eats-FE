@@ -1,4 +1,4 @@
-import { RegisterPayload, AuthResponse, User, UpdateProfilePayload } from "@/types/auth";
+import { RegisterPayload, LoginResponse, RegisterResponse, User, UpdateProfilePayload, MyPageResponse } from "@/types/auth";
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(path, {
@@ -26,9 +26,9 @@ async function del(path: string): Promise<void> {
   }
 }
 
-async function put<T>(path: string, body: unknown): Promise<T> {
+async function patch<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(path, {
-    method: "PUT",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
@@ -39,30 +39,43 @@ async function put<T>(path: string, body: unknown): Promise<T> {
 
 export const authService = {
   login: (email: string, password: string) =>
-    post<Omit<AuthResponse, "access_token" | "refresh_token">>("/auth/login", { email, password }),
+    post<LoginResponse>("/auth/login", { email, password }),
 
   sendCode: (email: string) =>
     post<{ message: string }>("/auth/send-code", { email }),
 
-  // 성공 시 200 { message }, 실패 시 4xx → 호출부에서 예외로 판별
   verifyCode: (email: string, code: string) =>
     post<{ message: string }>("/auth/verify-code", { email, code }),
 
   checkNickname: (nickname: string) =>
-    get<{ available: boolean }>(`/auth/check-nickname?nickname=${encodeURIComponent(nickname)}`),
+    get<{ available: boolean; message: string }>(`/auth/check-nickname?nickname=${encodeURIComponent(nickname)}`),
 
   register: (data: RegisterPayload) =>
-    post<Omit<AuthResponse, "access_token" | "refresh_token">>("/auth/register", data),
+    post<RegisterResponse>("/auth/register", data),
 
   refresh: () =>
-    post<{ message: string }>("/auth/refresh", {}),
+    post<LoginResponse>("/auth/refresh", {}),
 
   getMe: () =>
     get<User>("/users/me"),
 
+  getMyPage: (params?: { history_limit?: number }) => {
+    const query = params?.history_limit !== undefined ? `?history_limit=${params.history_limit}` : "";
+    return get<MyPageResponse>(`/users/me/mypage${query}`);
+  },
+
   updateProfile: (data: UpdateProfilePayload) =>
-    put<User>("/users", data),
+    patch<User>("/users/me", data),
 
   withdraw: () =>
     del("/users/me"),
+
+  resetSendCode: (email: string) =>
+    post<{ message: string }>("/auth/password/reset/send-code", { email }),
+
+  resetVerifyCode: (email: string, code: string) =>
+    post<{ message: string }>("/auth/password/reset/verify-code", { email, code }),
+
+  resetPassword: (email: string, new_password: string) =>
+    post<{ message: string }>("/auth/password/reset", { email, new_password }),
 };

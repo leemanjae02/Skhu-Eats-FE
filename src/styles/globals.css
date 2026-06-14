@@ -223,6 +223,88 @@ body {
   cursor: not-allowed;
 }
 
+/* =============================================
+   NOTIFICATIONS
+============================================= */
+.notif-group-header {
+  padding: 20px 20px 8px;
+  background: var(--grey-50);
+}
+.notif-group-header span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--grey-500);
+}
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 20px;
+  background: var(--white);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.notif-row.unread {
+  background: var(--primary-50);
+}
+.notif-row + .notif-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 0;
+  height: 1px;
+  background: var(--grey-200);
+}
+.notif-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+.notif-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--grey-900);
+  line-height: 21px;
+  margin-bottom: 2px;
+}
+.notif-desc {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--grey-600);
+  line-height: 19px;
+}
+.notif-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--grey-500);
+  line-height: 16px;
+  margin-top: 4px;
+}
+.notif-right {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 6px;
+  flex-shrink: 0;
+  width: 12px;
+}
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-full);
+  background: var(--primary-500);
+  flex-shrink: 0;
+}
+
 /* Animations */
 @keyframes fadeSlideUp {
   from {

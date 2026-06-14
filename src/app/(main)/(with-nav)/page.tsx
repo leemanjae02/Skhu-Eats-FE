@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Bell } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Card } from "@/components/common/Card";
@@ -10,7 +11,17 @@ import { useAuthStore } from "@/lib/store/useAuthStore";
 import { postService } from "@/services/post.service";
 import { Post } from "@/types/post";
 
-const FILTERS = ["전체", "한식", "일식", "중식", "양식", "분식", "면류"];
+const FILTERS = ["전체", "한식", "일식", "중식", "양식", "분식", "면류", "찌개"];
+
+const FOOD_CATEGORY_ENUM: Record<string, string> = {
+  한식: "KOREAN",
+  일식: "JAPANESE",
+  중식: "CHINESE",
+  양식: "WESTERN",
+  분식: "BUNSIK",
+  면류: "NOODLE",
+  찌개: "STEW",
+};
 
 export default function HomePage() {
   const router = useRouter();
@@ -23,9 +34,8 @@ export default function HomePage() {
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
-        const data = await postService.getPosts(
-          activeFilter !== "전체" ? { category: activeFilter } : undefined,
-        );
+        const food_category = FOOD_CATEGORY_ENUM[activeFilter];
+        const data = await postService.getPosts(food_category ? { food_category } : undefined);
         setPosts(data);
       } catch (err) {
         console.error("Failed to fetch posts:", err);
@@ -37,6 +47,8 @@ export default function HomePage() {
     fetchPosts();
   }, [activeFilter]);
 
+  const filteredPosts = posts;
+
   const stats = useMemo(() => {
     return {
       active: posts.filter((p) => p.status === "active").length,
@@ -45,10 +57,10 @@ export default function HomePage() {
   }, [posts]);
 
   const rightAction = (
-    <div className="relative p-2 cursor-pointer">
+    <Link href="/notifications" className="relative p-2">
       <Bell className="w-[22px] h-[22px] text-grey-700" />
       <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-[1.5px] border-white" />
-    </div>
+    </Link>
   );
 
   const formatTime = (isoString: string) => {
@@ -107,15 +119,15 @@ export default function HomePage() {
             <div className="py-20 text-center text-grey-400 text-sm font-medium">
               밥친구를 찾고 있어요...
             </div>
-          ) : posts.length > 0 ? (
-            posts.map((post) => (
-              <div key={post.id} onClick={() => router.push(`/post/${post.id}`)}>
+          ) : filteredPosts.length > 0 ? (
+            filteredPosts.map((post) => (
+              <div key={post.post_id} onClick={() => router.push(`/post/${post.post_id}`)}>
                 <Card
-                  thumbnail={post.thumbnail}
-                  category={post.category}
+                  thumbnail=""
+                  category={post.food_categories[0] ?? ""}
                   status={post.status}
                   time={formatTime(post.meeting_time)}
-                  title={post.menu}
+                  title={post.title}
                   location={post.location}
                   currentParticipants={post.current_participants}
                   maxParticipants={post.max_participants}

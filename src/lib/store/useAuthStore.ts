@@ -40,20 +40,21 @@ export const useAuthStore = create<AuthState>()(
       },
       updateProfile: async (data) => {
         const updated = await authService.updateProfile(data);
-        set({ user: updated });
+        set({ user: { ...updated, id: updated.user_id ?? updated.id ?? "" } });
       },
       setHasHydrated: (state) => set({ _hasHydrated: state }),
       initAuth: async () => {
         if (!get().isAuthenticated) return;
+        const normalize = (u: User): User => ({ ...u, id: u.user_id ?? u.id ?? "" });
         try {
           const user = await authService.getMe();
-          set({ user, isAuthenticated: true });
+          set({ user: normalize(user), isAuthenticated: true });
         } catch {
           // 쿠키 만료 → refresh 시도
           try {
             await authService.refresh();
             const user = await authService.getMe();
-            set({ user, isAuthenticated: true });
+            set({ user: normalize(user), isAuthenticated: true });
           } catch {
             set({ user: null, isAuthenticated: false });
           }
