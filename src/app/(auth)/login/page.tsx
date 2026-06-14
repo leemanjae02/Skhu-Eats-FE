@@ -105,10 +105,6 @@ export default function LoginPage() {
               <Input
                 {...register("emailId", {
                   required: "이메일을 입력해주세요",
-                  pattern: {
-                    value: /^[a-zA-Z0-9._-]+(@office\.skhu\.ac\.kr)?$/,
-                    message: "올바른 학번 또는 이메일을 입력해주세요",
-                  },
                 })}
                 className="pr-24"
                 placeholder="학번 또는 아이디"
@@ -132,10 +128,6 @@ export default function LoginPage() {
             <Input
               {...register("password", {
                 required: "비밀번호를 입력해주세요",
-                pattern: {
-                  value: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/,
-                  message: "영문, 숫자, 특수문자(@$!%*#?&)를 포함해 8자 이상 입력해주세요",
-                },
               })}
               type="password"
               placeholder="비밀번호 입력"
