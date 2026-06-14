@@ -3,6 +3,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const FOOD_ICON: Record<string, string> = {
+  면류: "🍜", NOODLE: "🍜",
+  한식: "🍚", KOREAN: "🍚",
+  일식: "🍣", JAPANESE: "🍣",
+  양식: "🍕", WESTERN: "🍕",
+  중식: "🥟", CHINESE: "🥟",
+  분식: "🌯", BUNSIK: "🌯",
+  찌개: "🍲", STEW: "🍲",
+  가벼운양식: "🥗", LIGHT_WESTERN: "🥗",
+};
+
 interface CardProps {
   thumbnail?: string;
   category: string;
@@ -38,7 +49,7 @@ export function Card({
     >
       <div className="flex items-start gap-3.5 p-4 pb-3.5">
         <div className="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center text-[26px] shrink-0">
-          {thumbnail}
+          {thumbnail || FOOD_ICON[category] || "🍽️"}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex gap-1.5 mb-1.5 flex-wrap">

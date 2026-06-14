@@ -15,8 +15,10 @@ const toJoinedBool = (v: unknown): boolean => {
 };
 
 export const postService = {
-  getPosts: (params?: { time_slot?: string; status?: string }) => {
-    const query = params ? `?${new URLSearchParams(params).toString()}` : "";
+  getPosts: (params?: { time_slot?: string; status?: string; food_category?: string; location?: string; max_participants?: number }) => {
+    if (!params) return fetchApi<Post[]>("/posts");
+    const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== "") as [string, string][];
+    const query = entries.length ? `?${new URLSearchParams(entries).toString()}` : "";
     return fetchApi<Post[]>(`/posts${query}`);
   },
 

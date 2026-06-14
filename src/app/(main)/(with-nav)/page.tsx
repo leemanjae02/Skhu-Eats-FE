@@ -11,7 +11,17 @@ import { useAuthStore } from "@/lib/store/useAuthStore";
 import { postService } from "@/services/post.service";
 import { Post } from "@/types/post";
 
-const FILTERS = ["전체", "한식", "일식", "중식", "양식", "분식", "면류"];
+const FILTERS = ["전체", "한식", "일식", "중식", "양식", "분식", "면류", "찌개"];
+
+const FOOD_CATEGORY_ENUM: Record<string, string> = {
+  한식: "KOREAN",
+  일식: "JAPANESE",
+  중식: "CHINESE",
+  양식: "WESTERN",
+  분식: "BUNSIK",
+  면류: "NOODLE",
+  찌개: "STEW",
+};
 
 export default function HomePage() {
   const router = useRouter();
@@ -24,7 +34,8 @@ export default function HomePage() {
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
-        const data = await postService.getPosts();
+        const food_category = FOOD_CATEGORY_ENUM[activeFilter];
+        const data = await postService.getPosts(food_category ? { food_category } : undefined);
         setPosts(data);
       } catch (err) {
         console.error("Failed to fetch posts:", err);
@@ -34,12 +45,9 @@ export default function HomePage() {
     };
 
     fetchPosts();
-  }, []);
+  }, [activeFilter]);
 
-  const filteredPosts = useMemo(() => {
-    if (activeFilter === "전체") return posts;
-    return posts.filter((p) => p.food_categories.includes(activeFilter));
-  }, [posts, activeFilter]);
+  const filteredPosts = posts;
 
   const stats = useMemo(() => {
     return {
