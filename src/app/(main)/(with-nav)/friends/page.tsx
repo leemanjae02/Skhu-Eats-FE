@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "@/lib/toast";
 import { TopBar } from "@/components/layout/TopBar";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,8 @@ const fmt = (iso: string) => {
 
 export default function FriendsPage() {
   const router = useRouter();
-  const [tab, setTab] = useState<TabKey>("created");
+  const searchParams = useSearchParams();
+  const tab: TabKey = searchParams.get("tab") === "joined" ? "joined" : "created";
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -95,7 +96,7 @@ export default function FriendsPage() {
         ).map((t) => (
           <button
             key={t.key}
-            onClick={() => setTab(t.key)}
+            onClick={() => router.replace(`/friends?tab=${t.key}`)}
             className={
               tab === t.key
                 ? "flex-1 text-center py-3.5 text-[16px] font-bold text-grey-900 border-b-2 border-primary-600"
