@@ -77,9 +77,11 @@ export default function PostDetailPage() {
         setJoined(false);
         setPost({ ...post, current_participants: Math.max(0, post.current_participants - 1) });
       } else {
-        const res = await postService.joinPost(post.post_id);
-        setJoined(res.join_status);
-        setPost({ ...post, current_participants: res.current_participants, status: res.status });
+        await postService.joinPost(post.post_id);
+        // 참여 후 kakao_link 등 참여자 전용 필드 포함한 최신 데이터 재조회
+        const updated = await postService.getPost(post.post_id);
+        setPost(updated);
+        setJoined(updated.join_status ?? true);
       }
     } catch (err) {
       const action = joined ? "참여 취소" : "참여 신청";
