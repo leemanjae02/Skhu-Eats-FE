@@ -158,7 +158,7 @@ export default function RegisterPage() {
         password,
         nickname: data.nickname,
         department: data.department,
-        admission_year: data.admissionYear,
+        admission_year: parseInt(data.admissionYear, 10),
         food_categories: selectedCategories,
       });
       setAuth({

@@ -40,7 +40,7 @@ export const useAuthStore = create<AuthState>()(
       },
       updateProfile: async (data) => {
         const updated = await authService.updateProfile(data);
-        set({ user: updated });
+        set({ user: { ...updated, id: updated.user_id ?? updated.id ?? "" } });
       },
       setHasHydrated: (state) => set({ _hasHydrated: state }),
       initAuth: async () => {

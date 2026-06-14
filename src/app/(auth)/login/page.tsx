@@ -172,7 +172,7 @@ export default function LoginPage() {
             </Link>
             <span className="text-grey-300 text-[13px]">|</span>
             <Link
-              href="#"
+              href="/password-reset"
               className="text-[13px] font-medium text-grey-600 px-[10px] py-1"
             >
               비밀번호 재설정

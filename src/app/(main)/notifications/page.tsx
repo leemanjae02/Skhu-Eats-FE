@@ -135,7 +135,7 @@ export default function NotificationsPage() {
               </div>
               <div>
                 {group.items.map((notif) => {
-                  const { bg, color, Icon } = ICON_CONFIG[notif.type];
+                  const { bg, color, Icon } = ICON_CONFIG[notif.type] ?? { bg: "bg-grey-100", color: "text-grey-500", Icon: BellRing };
                   return (
                     <div
                       key={notif.notification_id}
