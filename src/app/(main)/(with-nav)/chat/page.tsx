@@ -1,11 +1,25 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 
 export default function ChatPage() {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col h-full bg-white">
-      <TopBar title="채팅" />
+      <TopBar
+        title="채팅"
+        leftAction={
+          <button
+            onClick={() => router.back()}
+            className="w-11 h-11 flex items-center justify-center text-grey-700"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        }
+      />
       <main className="flex-1 overflow-y-auto no-scrollbar flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="w-16 h-16 bg-grey-100 rounded-full flex items-center justify-center">

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Utensils, Crown, Bell, Lock, FileText, ChevronRight } from "lucide-react";
+import { Settings, Utensils, Crown, Bell, Lock, FileText, ChevronRight, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { authService } from "@/services/auth.service";
 import { MyPageResponse } from "@/types/auth";
@@ -42,6 +42,14 @@ export default function ProfilePage() {
     <div className="flex flex-col h-full bg-white">
       <TopBar
         title="마이페이지"
+        leftAction={
+          <button
+            onClick={() => router.back()}
+            className="w-11 h-11 flex items-center justify-center text-grey-700"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        }
         rightAction={
           <button className="p-2 text-grey-700">
             <Settings className="w-5 h-5" />

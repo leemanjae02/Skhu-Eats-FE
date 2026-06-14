@@ -17,7 +17,7 @@ const CATEGORIES = [
   { label: "☕ 카페", value: "카페" },
 ];
 
-const LOCATION_PRESETS = ["학생회관 1층 식당", "정문 앞 먹자골목", "후문 카페거리"];
+const LOCATION_PRESETS = ["느티아래", "중앙도서관 앞", "새천년관 앞"];
 
 function CreatePostForm() {
   const router = useRouter();
@@ -79,16 +79,22 @@ function CreatePostForm() {
   const step1Valid = title.trim().length > 0 && categories.length > 0;
   const resolvedLocation = location === "직접 입력" ? customLocation.trim() : location;
   const step2Valid = useMemo(
-    () => Boolean(date && time && resolvedLocation),
-    [date, time, resolvedLocation],
+    () => Boolean(date && time && resolvedLocation && kakaoLink.trim()),
+    [date, time, resolvedLocation, kakaoLink],
   );
 
   const handleSubmit = async () => {
     if (!step2Valid || submitting) return;
+
+    const meetingTime = new Date(`${date}T${time}:00`).toISOString();
+    if (new Date(`${date}T${time}:00`) <= new Date()) {
+      setError("모임 시간은 현재 시간 이후여야 해요");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
-      const meetingTime = new Date(`${date}T${time}:00`).toISOString();
       const payload = {
         title: title.trim(),
         food_categories: categories,
@@ -278,7 +284,7 @@ function CreatePostForm() {
 
             <section>
               <label className="text-[11px] font-bold text-grey-500 uppercase tracking-[1.2px] mb-2 block">
-                오픈카톡 링크 <span className="text-grey-400 font-normal normal-case tracking-normal">(선택)</span>
+                오픈카톡 링크
               </label>
               <input
                 type="text"
