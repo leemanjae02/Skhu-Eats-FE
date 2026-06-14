@@ -59,11 +59,22 @@ export interface JoinPostResponse {
 /** GET /users/me/history 항목 (참여 이력) */
 export interface Participation {
   participation_id: string;
+  participation_status: string;
   post_id: string;
+  host_id: string;
+  host_nickname: string;
   title: string;
+  food_categories: string[];
   location: string;
   meeting_time: string;
-  status: "completed" | "upcoming";
+  deadline?: string;
+  max_participants: number;
+  current_participants: number;
+  post_status: string;
+  post_status_label?: string;
+  can_cancel: boolean;
+  joined_at: string;
+  updated_at?: string;
 }
 
 /** GET /users/me/history 응답 (페이지네이션) */

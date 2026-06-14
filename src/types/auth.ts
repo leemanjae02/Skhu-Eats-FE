@@ -6,7 +6,7 @@ export interface User {
   nickname: string;
   avatar: string | null;
   department?: string;
-  admission_year?: string;
+  admission_year?: string | number;
   bio?: string;
   food_categories?: string[];
 }
@@ -28,7 +28,7 @@ export interface RegisterResponse {
   email: string;
   nickname: string;
   department?: string;
-  admission_year?: string;
+  admission_year?: number;
   bio?: string;
   email_verified?: boolean;
 }
@@ -43,7 +43,38 @@ export interface RegisterPayload {
   password: string;
   nickname: string;
   department: string;
-  admission_year: string;
+  /** API 명세: integer */
+  admission_year: number;
   bio?: string;
   food_categories?: string[];
+}
+
+/** GET /users/me/mypage 이력 미리보기 항목 */
+export interface MyPageHistoryPreview {
+  participation_id: string;
+  participation_status: string;
+  post_id: string;
+  title: string;
+  food_categories: string[];
+  location: string;
+  meeting_time: string;
+  max_participants: number;
+  post_status: string;
+  post_status_label: string;
+}
+
+/** GET /users/me/mypage 응답 */
+export interface MyPageResponse {
+  user_id: string;
+  email: string;
+  nickname: string;
+  department: string;
+  admission_year: number;
+  bio?: string;
+  food_categories: string[];
+  avatar?: string;
+  total_join_count: number;
+  total_post_count: number;
+  manner_score: number;
+  recent_histories: MyPageHistoryPreview[];
 }
